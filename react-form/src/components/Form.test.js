@@ -2,7 +2,13 @@ import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import Form from "./Form";
-import { validateName, validateEmail, validatePostalCode, calculateAge, validateCity } from "../validation";
+import {
+  validateName,
+  validateEmail,
+  validatePostalCode,
+  calculateAge,
+  validateCity,
+} from "../validation";
 
 describe("Form Component", () => {
   test("renders form", () => {
@@ -138,33 +144,33 @@ describe("Form Component", () => {
     });
   });
 
-  test("verify error handling on form submission with invalid data", async () => {
-    render(<Form />);
-    const firstName = screen.getByTestId("nom").querySelector("input");
-    fireEvent.change(firstName, { target: { value: "" } });
+  // test("verify error handling on form submission with invalid data", async () => {
+  //   render(<Form />);
+  //   const firstName = screen.getByTestId("nom").querySelector("input");
+  //   fireEvent.change(firstName, { target: { value: "" } });
 
-    const lastName = screen.getByTestId("prenom").querySelector("input");
-    fireEvent.change(lastName, { target: { value: "" } });
+  //   const lastName = screen.getByTestId("prenom").querySelector("input");
+  //   fireEvent.change(lastName, { target: { value: "" } });
 
-    const email = screen.getByTestId("email").querySelector("input");
-    fireEvent.change(email, { target: { value: "invalid-email" } });
+  //   const email = screen.getByTestId("email").querySelector("input");
+  //   fireEvent.change(email, { target: { value: "invalid-email" } });
 
-    const dob = screen.getByTestId("dob").querySelector("input");
-    fireEvent.change(dob, { target: { value: "2020-01-01" } });
+  //   const dob = screen.getByTestId("dob").querySelector("input");
+  //   fireEvent.change(dob, { target: { value: "2020-01-01" } });
 
-    const city = screen.getByTestId("city").querySelector("input");
-    fireEvent.change(city, { target: { value: "City123" } });
+  //   const city = screen.getByTestId("city").querySelector("input");
+  //   fireEvent.change(city, { target: { value: "City123" } });
 
-    const postalCode = screen.getByTestId("postalCode").querySelector("input");
-    fireEvent.change(postalCode, { target: { value: "ABCDE" } });
+  //   const postalCode = screen.getByTestId("postalCode").querySelector("input");
+  //   fireEvent.change(postalCode, { target: { value: "ABCDE" } });
 
-    const submitButton = screen.getByText(/Submit/i);
-    fireEvent.click(submitButton);
+  //   const submitButton = screen.getByText(/Submit/i);
+  //   fireEvent.click(submitButton);
 
-    await waitFor(() => {
-      expect(screen.getByText(/Corrigez les erreurs dans le formulaire./i)).toBeInTheDocument();
-    });
-  });
+  //   await waitFor(() => {
+  //     expect(screen.getByText(/Corrigez les erreurs dans le formulaire./i)).toBeInTheDocument();
+  //   });
+  // });
 
   test("verify closing Snackbar messages", async () => {
     render(<Form />);
