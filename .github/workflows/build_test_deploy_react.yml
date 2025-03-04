@@ -39,5 +39,5 @@ jobs:
         uses: actions/upload-pages-artifact@v2
         with:
         # Upload entire repository
-          path: build
+          path: react-form/build
           if-no-files-found: error
