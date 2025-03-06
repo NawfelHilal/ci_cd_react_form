@@ -168,7 +168,9 @@ describe("Form Component", () => {
   //   fireEvent.click(submitButton);
 
   //   await waitFor(() => {
-  //     expect(screen.getByText(/Corrigez les erreurs dans le formulaire./i)).toBeInTheDocument();
+  //     expect(
+  //       screen.getByText(/Corrigez les erreurs dans le formulaire./i)
+  //     ).toBeInTheDocument();
   //   });
   // });
 
