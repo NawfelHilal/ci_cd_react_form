@@ -26,17 +26,26 @@ const Form = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const [openError, setOpenError] = useState(false);
   const [openSuccess, setOpenSuccess] = useState(false);
+  const [submitted, setSubmitted] = useState(false); // Nouvel état pour suivre si le formulaire a été soumis
 
+  const resetForm = () => {
+    setFirstName("");
+    setLastName("");
+    setEmail("");
+    setDob("");
+    setCity("");
+    setPostalCode("");
+    setError("");
+    setFieldErrors({});
+    setSubmitted(false); // Réinitialiser l'état de soumission
+  };
+
+  // Simplifiez tous les gestionnaires de changement pour ne pas afficher d'erreurs pendant la saisie
   const handleFirstNameChange = (e) => {
     const value = e.target.value;
     setFirstName(value);
-    if (!validateName(value)) {
-      setFieldErrors((prev) => ({
-        ...prev,
-        firstName:
-          "Le champ nom ne doit contenir que des lettres et des accents.",
-      }));
-    } else {
+    // Suppression des erreurs si on est après une soumission et que le champ devient valide
+    if (submitted && validateName(value)) {
       setFieldErrors((prev) => {
         const { firstName, ...rest } = prev;
         return rest;
@@ -47,13 +56,7 @@ const Form = () => {
   const handleLastNameChange = (e) => {
     const value = e.target.value;
     setLastName(value);
-    if (!validateName(value)) {
-      setFieldErrors((prev) => ({
-        ...prev,
-        lastName:
-          "Le champ prenom ne doit contenir que des lettres et des accents.",
-      }));
-    } else {
+    if (submitted && validateName(value)) {
       setFieldErrors((prev) => {
         const { lastName, ...rest } = prev;
         return rest;
@@ -64,9 +67,7 @@ const Form = () => {
   const handleEmailChange = (e) => {
     const value = e.target.value;
     setEmail(value);
-    if (!validateEmail(value)) {
-      setFieldErrors((prev) => ({ ...prev, email: "Invalide champs email." }));
-    } else {
+    if (submitted && validateEmail(value)) {
       setFieldErrors((prev) => {
         const { email, ...rest } = prev;
         return rest;
@@ -77,13 +78,7 @@ const Form = () => {
   const handleDobChange = (e) => {
     const value = e.target.value;
     setDob(value);
-    const age = calculateAge(value);
-    if (age < 18) {
-      setFieldErrors((prev) => ({
-        ...prev,
-        dob: "Vous devez avoir plus de 18 ans.",
-      }));
-    } else {
+    if (submitted && calculateAge(value) >= 18) {
       setFieldErrors((prev) => {
         const { dob, ...rest } = prev;
         return rest;
@@ -94,12 +89,7 @@ const Form = () => {
   const handleCityChange = (e) => {
     const value = e.target.value;
     setCity(value);
-    if (!validateCity(value)) {
-      setFieldErrors((prev) => ({
-        ...prev,
-        city: "Le champ ville ne doit contenir que des lettres et des accents.",
-      }));
-    } else {
+    if (submitted && validateCity(value)) {
       setFieldErrors((prev) => {
         const { city, ...rest } = prev;
         return rest;
@@ -110,12 +100,7 @@ const Form = () => {
   const handlePostalCodeChange = (e) => {
     const value = e.target.value;
     setPostalCode(value);
-    if (!validatePostalCode(value)) {
-      setFieldErrors((prev) => ({
-        ...prev,
-        postalCode: "Le code postale doit être au format français.",
-      }));
-    } else {
+    if (submitted && validatePostalCode(value)) {
       setFieldErrors((prev) => {
         const { postalCode, ...rest } = prev;
         return rest;
@@ -125,13 +110,40 @@ const Form = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const age = calculateAge(dob);
+    setSubmitted(true); // Marquer le formulaire comme soumis
+
+    // Vérifier tous les champs pour les erreurs
     const errors = {};
 
+    if (!validateName(firstName)) {
+      errors.firstName =
+        "Le champ nom ne doit contenir que des lettres et des accents.";
+    }
+
+    if (!validateName(lastName)) {
+      errors.lastName =
+        "Le champ prenom ne doit contenir que des lettres et des accents.";
+    }
+
+    if (!validateEmail(email)) {
+      errors.email = "Invalide champs email.";
+    }
+
+    const age = calculateAge(dob);
     if (age < 18) {
       errors.dob = "Vous devez avoir plus de 18 ans.";
     }
 
+    if (!validateCity(city)) {
+      errors.city =
+        "Le champ ville ne doit contenir que des lettres et des accents.";
+    }
+
+    if (!validatePostalCode(postalCode)) {
+      errors.postalCode = "Le code postale doit être au format français.";
+    }
+
+    // Si des erreurs existent, afficher le toaster d'erreur
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       setError("Corrigez les erreurs dans le formulaire.");
@@ -139,6 +151,7 @@ const Form = () => {
       return;
     }
 
+    // Si tout est valide, enregistrer et afficher le toaster de succès
     const formData = {
       firstName,
       lastName,
@@ -149,8 +162,7 @@ const Form = () => {
     };
 
     localStorage.setItem("registrationData", JSON.stringify(formData));
-    setFieldErrors({});
-    setError("");
+    resetForm();
     setOpenSuccess(true);
   };
 
@@ -162,16 +174,9 @@ const Form = () => {
     setOpenSuccess(false);
   };
 
+  // Modifier pour que le bouton soit activé si tous les champs ont une valeur, même s'il y a des erreurs
   const isFormValid = () => {
-    return (
-      firstName &&
-      lastName &&
-      email &&
-      dob &&
-      city &&
-      postalCode &&
-      !Object.keys(fieldErrors).length
-    );
+    return firstName && lastName && email && dob && city && postalCode;
   };
 
   return (
@@ -187,8 +192,8 @@ const Form = () => {
               onChange={handleFirstNameChange}
               required
               fullWidth
-              error={!!fieldErrors.firstName}
-              helperText={fieldErrors.firstName}
+              error={submitted && !!fieldErrors.firstName}
+              helperText={submitted && fieldErrors.firstName}
             />
           </Grid>
           <Grid item xs={4}>
@@ -199,8 +204,8 @@ const Form = () => {
               onChange={handleLastNameChange}
               required
               fullWidth
-              error={!!fieldErrors.lastName}
-              helperText={fieldErrors.lastName}
+              error={submitted && !!fieldErrors.lastName}
+              helperText={submitted && fieldErrors.lastName}
             />
           </Grid>
           <Grid item xs={4}>
@@ -212,8 +217,8 @@ const Form = () => {
               onChange={handleEmailChange}
               required
               fullWidth
-              error={!!fieldErrors.email}
-              helperText={fieldErrors.email}
+              error={submitted && !!fieldErrors.email}
+              helperText={submitted && fieldErrors.email}
             />
           </Grid>
           <Grid item xs={4}>
@@ -228,8 +233,8 @@ const Form = () => {
               }}
               required
               fullWidth
-              error={!!fieldErrors.dob}
-              helperText={fieldErrors.dob}
+              error={submitted && !!fieldErrors.dob}
+              helperText={submitted && fieldErrors.dob}
             />
           </Grid>
           <Grid item xs={4}>
@@ -240,8 +245,8 @@ const Form = () => {
               onChange={handleCityChange}
               required
               fullWidth
-              error={!!fieldErrors.city}
-              helperText={fieldErrors.city}
+              error={submitted && !!fieldErrors.city}
+              helperText={submitted && fieldErrors.city}
             />
           </Grid>
           <Grid item xs={4}>
@@ -252,12 +257,12 @@ const Form = () => {
               onChange={handlePostalCodeChange}
               required
               fullWidth
-              error={!!fieldErrors.postalCode}
-              helperText={fieldErrors.postalCode}
+              error={submitted && !!fieldErrors.postalCode}
+              helperText={submitted && fieldErrors.postalCode}
             />
           </Grid>
         </Grid>
-        {error && <Typography color="error">{error}</Typography>}
+        {submitted && error && <Typography color="error">{error}</Typography>}
         <Button
           type="submit"
           variant="contained"

@@ -144,36 +144,6 @@ describe("Form Component", () => {
     });
   });
 
-  // test("verify error handling on form submission with invalid data", async () => {
-  //   render(<Form />);
-  //   const firstName = screen.getByTestId("nom").querySelector("input");
-  //   fireEvent.change(firstName, { target: { value: "" } });
-
-  //   const lastName = screen.getByTestId("prenom").querySelector("input");
-  //   fireEvent.change(lastName, { target: { value: "" } });
-
-  //   const email = screen.getByTestId("email").querySelector("input");
-  //   fireEvent.change(email, { target: { value: "invalid-email" } });
-
-  //   const dob = screen.getByTestId("dob").querySelector("input");
-  //   fireEvent.change(dob, { target: { value: "2020-01-01" } });
-
-  //   const city = screen.getByTestId("city").querySelector("input");
-  //   fireEvent.change(city, { target: { value: "City123" } });
-
-  //   const postalCode = screen.getByTestId("postalCode").querySelector("input");
-  //   fireEvent.change(postalCode, { target: { value: "ABCDE" } });
-
-  //   const submitButton = screen.getByText(/Submit/i);
-  //   fireEvent.click(submitButton);
-
-  //   await waitFor(() => {
-  //     expect(
-  //       screen.getByText(/Corrigez les erreurs dans le formulaire./i)
-  //     ).toBeInTheDocument();
-  //   });
-  // });
-
   test("verify closing Snackbar messages", async () => {
     render(<Form />);
     const firstName = screen.getByTestId("nom").querySelector("input");
@@ -231,4 +201,172 @@ describe("Form Component", () => {
     const submitButton = screen.getByText(/Submit/i);
     expect(submitButton).toBeDisabled();
   });
+
+  test("verify fields are cleared after successful submission", async () => {
+    render(<Form />);
+
+    const firstName = screen.getByTestId("nom").querySelector("input");
+    fireEvent.change(firstName, { target: { value: "Jean" } });
+
+    const lastName = screen.getByTestId("prenom").querySelector("input");
+    fireEvent.change(lastName, { target: { value: "Dupont" } });
+
+    const email = screen.getByTestId("email").querySelector("input");
+    fireEvent.change(email, { target: { value: "jean.dupont@example.com" } });
+
+    const dob = screen.getByTestId("dob").querySelector("input");
+    fireEvent.change(dob, { target: { value: "2000-01-01" } });
+
+    const city = screen.getByTestId("city").querySelector("input");
+    fireEvent.change(city, { target: { value: "Paris" } });
+
+    const postalCode = screen.getByTestId("postalCode").querySelector("input");
+    fireEvent.change(postalCode, { target: { value: "75001" } });
+
+    expect(firstName.value).toBe("Jean");
+    expect(lastName.value).toBe("Dupont");
+    expect(email.value).toBe("jean.dupont@example.com");
+    expect(dob.value).toBe("2000-01-01");
+    expect(city.value).toBe("Paris");
+    expect(postalCode.value).toBe("75001");
+
+    const submitButton = screen.getByText(/Submit/i);
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Enregistrement réussi/i)).toBeInTheDocument();
+    });
+
+    expect(firstName.value).toBe("");
+    expect(lastName.value).toBe("");
+    expect(email.value).toBe("");
+    expect(dob.value).toBe("");
+    expect(city.value).toBe("");
+    expect(postalCode.value).toBe("");
+  });
+
+
+  test("verify error handling on form submission with invalid data", async () => {
+  render(<Form />);
+
+  const firstName = screen.getByTestId("nom").querySelector("input");
+  fireEvent.change(firstName, { target: { value: "Jean123" } });
+
+  const lastName = screen.getByTestId("prenom").querySelector("input");
+  fireEvent.change(lastName, { target: { value: "Dupont456" } });
+
+  const email = screen.getByTestId("email").querySelector("input");
+  fireEvent.change(email, { target: { value: "invalid-email" } });
+
+  const dob = screen.getByTestId("dob").querySelector("input");
+  fireEvent.change(dob, { target: { value: "2020-01-01" } });
+
+  const city = screen.getByTestId("city").querySelector("input");
+  fireEvent.change(city, { target: { value: "City123" } });
+
+  const postalCode = screen.getByTestId("postalCode").querySelector("input");
+  fireEvent.change(postalCode, { target: { value: "ABCDE" } });
+
+  const submitButton = screen.getByText(/Submit/i);
+  fireEvent.click(submitButton);
+
+  await waitFor(() => {
+    const errorAlert = screen.getByRole('alert');
+    expect(errorAlert).toBeInTheDocument();
+    expect(errorAlert).toHaveTextContent(/Corrigez les erreurs/i);
+  });
+});
+
+
+test("verify closing error Snackbar message", async () => {
+  render(<Form />);
+  const firstName = screen.getByTestId("nom").querySelector("input");
+  fireEvent.change(firstName, { target: { value: "Jean123" } });
+
+  const lastName = screen.getByTestId("prenom").querySelector("input");
+  fireEvent.change(lastName, { target: { value: "Dupont" } });
+
+  const email = screen.getByTestId("email").querySelector("input");
+  fireEvent.change(email, { target: { value: "jean.dupont@example.com" } });
+
+  const dob = screen.getByTestId("dob").querySelector("input");
+  fireEvent.change(dob, { target: { value: "2000-01-01" } });
+
+  const city = screen.getByTestId("city").querySelector("input");
+  fireEvent.change(city, { target: { value: "Paris" } });
+
+  const postalCode = screen.getByTestId("postalCode").querySelector("input");
+  fireEvent.change(postalCode, { target: { value: "75001" } });
+
+  const submitButton = screen.getByText(/Submit/i);
+  fireEvent.click(submitButton);
+
+  await waitFor(() => {
+    const errorAlert = screen.getByRole('alert');
+    expect(errorAlert).toBeInTheDocument();
+  });
+
+  const closeButton = screen.getAllByRole("button", { name: /close/i })[0];
+  fireEvent.click(closeButton);
+
+  await waitFor(() => {
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+});
+
+
+test("verify field errors are cleared when field value becomes valid", () => {
+  render(<Form />);
+  
+  const firstName = screen.getByTestId("nom").querySelector("input");
+  
+  fireEvent.change(firstName, { target: { value: "Jean123" } });
+  expect(screen.getByText(/Le champ nom ne doit contenir que des lettres/i)).toBeInTheDocument();
+  
+  fireEvent.change(firstName, { target: { value: "Jean" } });
+  expect(screen.queryByText(/Le champ nom ne doit contenir que des lettres/i)).not.toBeInTheDocument();
+
+  const email = screen.getByTestId("email").querySelector("input");
+  
+  fireEvent.change(email, { target: { value: "invalid-email" } });
+  expect(screen.getByText(/Invalide champs email/i)).toBeInTheDocument();
+  
+  fireEvent.change(email, { target: { value: "valid@example.com" } });
+  expect(screen.queryByText(/Invalide champs email/i)).not.toBeInTheDocument();
+});
+
+
+test("verify age calculation and validation", () => {
+  render(<Form />);
+  const dob = screen.getByTestId("dob").querySelector("input");
+  
+  const futureDate = new Date();
+  futureDate.setFullYear(futureDate.getFullYear() - 10); // 10 ans
+  const formattedFutureDate = futureDate.toISOString().split('T')[0];
+  
+  fireEvent.change(dob, { target: { value: formattedFutureDate } });
+  expect(screen.getByText(/Vous devez avoir plus de 18 ans/i)).toBeInTheDocument();
+  
+  const pastDate = new Date();
+  pastDate.setFullYear(pastDate.getFullYear() - 20); // 20 ans
+  const formattedPastDate = pastDate.toISOString().split('T')[0];
+  
+  fireEvent.change(dob, { target: { value: formattedPastDate } });
+  expect(screen.queryByText(/Vous devez avoir plus de 18 ans/i)).not.toBeInTheDocument();
+});
+
+
+test("verify postal code validation", () => {
+  render(<Form />);
+  const postalCode = screen.getByTestId("postalCode").querySelector("input");
+  
+  fireEvent.change(postalCode, { target: { value: "1234" } });  // trop court
+  expect(screen.getByText(/Le code postale doit être au format français/i)).toBeInTheDocument();
+  
+  fireEvent.change(postalCode, { target: { value: "ABCDE" } });  // lettres
+  expect(screen.getByText(/Le code postale doit être au format français/i)).toBeInTheDocument();
+  
+  fireEvent.change(postalCode, { target: { value: "75001" } });
+  expect(screen.queryByText(/Le code postale doit être au format français/i)).not.toBeInTheDocument();
+});
 });
