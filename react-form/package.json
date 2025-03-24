@@ -17,10 +17,11 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "jsdoc": "jsdoc -R ./README.md -c ./jsdoc.config.json -r -d ./public/docs",
     "test": "react-scripts test --coverage --watchAll=false",
     "eject": "react-scripts eject",
-    "predeploy" : "npm run build",
-    "deploy" : "gh-pages -d build"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -43,6 +44,7 @@
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
+    "jsdoc": "^4.0.4",
     "react-test-renderer": "^19.0.0"
   }
 }
