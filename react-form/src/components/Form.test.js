@@ -492,4 +492,144 @@ describe("Form Component", () => {
       ).not.toBeInTheDocument();
     });
   });
+
+  // Ajoutez ce test pour vérifier la validation de la ville
+  test("verify city validation", async () => {
+    render(<Form />);
+
+    // Remplir les champs requis pour pouvoir soumettre
+    const firstName = screen.getByTestId("nom").querySelector("input");
+    fireEvent.change(firstName, { target: { value: "Jean" } });
+
+    const lastName = screen.getByTestId("prenom").querySelector("input");
+    fireEvent.change(lastName, { target: { value: "Dupont" } });
+
+    const email = screen.getByTestId("email").querySelector("input");
+    fireEvent.change(email, { target: { value: "jean.dupont@example.com" } });
+
+    const dob = screen.getByTestId("dob").querySelector("input");
+    const pastDate = new Date();
+    pastDate.setFullYear(pastDate.getFullYear() - 20);
+    const formattedPastDate = pastDate.toISOString().split("T")[0];
+    fireEvent.change(dob, { target: { value: formattedPastDate } });
+
+    const postalCode = screen.getByTestId("postalCode").querySelector("input");
+    fireEvent.change(postalCode, { target: { value: "75001" } });
+
+    // Test avec une ville invalide
+    const city = screen.getByTestId("city").querySelector("input");
+    fireEvent.change(city, { target: { value: "Paris123" } }); // Ville avec chiffres
+
+    // Soumettre pour afficher l'erreur
+    const submitButton = screen.getByText(/Submit/i);
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Le champ ville ne doit contenir que des lettres/i)
+      ).toBeInTheDocument();
+    });
+
+    // Test avec une ville valide
+    fireEvent.change(city, { target: { value: "Paris" } });
+
+    // Vérifier que l'erreur disparaît
+    await waitFor(() => {
+      expect(
+        screen.queryByText(/Le champ ville ne doit contenir que des lettres/i)
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  // Test pour vérifier le reset du formulaire avec un champ firstName invalide
+  test("verify form reset with invalid firstName", async () => {
+    render(<Form />);
+
+    // Remplir les champs avec firstName invalide
+    const firstName = screen.getByTestId("nom").querySelector("input");
+    fireEvent.change(firstName, { target: { value: "Jean123" } });
+
+    const lastName = screen.getByTestId("prenom").querySelector("input");
+    fireEvent.change(lastName, { target: { value: "Dupont" } });
+
+    const email = screen.getByTestId("email").querySelector("input");
+    fireEvent.change(email, { target: { value: "jean.dupont@example.com" } });
+
+    const dob = screen.getByTestId("dob").querySelector("input");
+    fireEvent.change(dob, { target: { value: "2000-01-01" } });
+
+    const city = screen.getByTestId("city").querySelector("input");
+    fireEvent.change(city, { target: { value: "Paris" } });
+
+    const postalCode = screen.getByTestId("postalCode").querySelector("input");
+    fireEvent.change(postalCode, { target: { value: "75001" } });
+
+    // Soumettre le formulaire
+    const submitButton = screen.getByText(/Submit/i);
+    fireEvent.click(submitButton);
+
+    // Attendre l'erreur
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+    });
+
+    // Corriger firstName et soumettre à nouveau
+    fireEvent.change(firstName, { target: { value: "Jean" } });
+    fireEvent.click(submitButton);
+
+    // Vérifier succès
+    await waitFor(() => {
+      expect(screen.getByText(/Enregistrement réussi/i)).toBeInTheDocument();
+    });
+
+    // Vérifier le reset
+    expect(firstName.value).toBe("");
+    expect(lastName.value).toBe("");
+    expect(email.value).toBe("");
+    expect(dob.value).toBe("");
+    expect(city.value).toBe("");
+    expect(postalCode.value).toBe("");
+  });
+
+  // Test pour vérifier le cas où tous les champs sont vides
+  test("verify form with all fields empty", () => {
+    render(<Form />);
+
+    // Vérifier que tous les champs sont vides par défaut
+    const firstName = screen.getByTestId("nom").querySelector("input");
+    const lastName = screen.getByTestId("prenom").querySelector("input");
+    const email = screen.getByTestId("email").querySelector("input");
+    const dob = screen.getByTestId("dob").querySelector("input");
+    const city = screen.getByTestId("city").querySelector("input");
+    const postalCode = screen.getByTestId("postalCode").querySelector("input");
+
+    expect(firstName.value).toBe("");
+    expect(lastName.value).toBe("");
+    expect(email.value).toBe("");
+    expect(dob.value).toBe("");
+    expect(city.value).toBe("");
+    expect(postalCode.value).toBe("");
+
+    // Vérifier que le bouton Submit est désactivé
+    const submitButton = screen.getByText(/Submit/i);
+    expect(submitButton).toBeDisabled();
+  });
+
+  // Test pour vérifier le cas où l'utilisateur remplit certains champs puis les vide
+  test("verify form with fields filled then emptied", () => {
+    render(<Form />);
+
+    // Remplir un champ
+    const firstName = screen.getByTestId("nom").querySelector("input");
+    fireEvent.change(firstName, { target: { value: "Jean" } });
+    expect(firstName.value).toBe("Jean");
+
+    // Vider le champ
+    fireEvent.change(firstName, { target: { value: "" } });
+    expect(firstName.value).toBe("");
+
+    // Vérifier que le bouton Submit est désactivé
+    const submitButton = screen.getByText(/Submit/i);
+    expect(submitButton).toBeDisabled();
+  });
 });
