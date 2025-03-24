@@ -245,128 +245,251 @@ describe("Form Component", () => {
     expect(postalCode.value).toBe("");
   });
 
-
   test("verify error handling on form submission with invalid data", async () => {
-  render(<Form />);
+    render(<Form />);
 
-  const firstName = screen.getByTestId("nom").querySelector("input");
-  fireEvent.change(firstName, { target: { value: "Jean123" } });
+    const firstName = screen.getByTestId("nom").querySelector("input");
+    fireEvent.change(firstName, { target: { value: "Jean123" } });
 
-  const lastName = screen.getByTestId("prenom").querySelector("input");
-  fireEvent.change(lastName, { target: { value: "Dupont456" } });
+    const lastName = screen.getByTestId("prenom").querySelector("input");
+    fireEvent.change(lastName, { target: { value: "Dupont456" } });
 
-  const email = screen.getByTestId("email").querySelector("input");
-  fireEvent.change(email, { target: { value: "invalid-email" } });
+    const email = screen.getByTestId("email").querySelector("input");
+    fireEvent.change(email, { target: { value: "invalid-email" } });
 
-  const dob = screen.getByTestId("dob").querySelector("input");
-  fireEvent.change(dob, { target: { value: "2020-01-01" } });
+    const dob = screen.getByTestId("dob").querySelector("input");
+    fireEvent.change(dob, { target: { value: "2020-01-01" } });
 
-  const city = screen.getByTestId("city").querySelector("input");
-  fireEvent.change(city, { target: { value: "City123" } });
+    const city = screen.getByTestId("city").querySelector("input");
+    fireEvent.change(city, { target: { value: "City123" } });
 
-  const postalCode = screen.getByTestId("postalCode").querySelector("input");
-  fireEvent.change(postalCode, { target: { value: "ABCDE" } });
+    const postalCode = screen.getByTestId("postalCode").querySelector("input");
+    fireEvent.change(postalCode, { target: { value: "ABCDE" } });
 
-  const submitButton = screen.getByText(/Submit/i);
-  fireEvent.click(submitButton);
+    const submitButton = screen.getByText(/Submit/i);
+    fireEvent.click(submitButton);
 
-  await waitFor(() => {
-    const errorAlert = screen.getByRole('alert');
-    expect(errorAlert).toBeInTheDocument();
-    expect(errorAlert).toHaveTextContent(/Corrigez les erreurs/i);
-  });
-});
-
-
-test("verify closing error Snackbar message", async () => {
-  render(<Form />);
-  const firstName = screen.getByTestId("nom").querySelector("input");
-  fireEvent.change(firstName, { target: { value: "Jean123" } });
-
-  const lastName = screen.getByTestId("prenom").querySelector("input");
-  fireEvent.change(lastName, { target: { value: "Dupont" } });
-
-  const email = screen.getByTestId("email").querySelector("input");
-  fireEvent.change(email, { target: { value: "jean.dupont@example.com" } });
-
-  const dob = screen.getByTestId("dob").querySelector("input");
-  fireEvent.change(dob, { target: { value: "2000-01-01" } });
-
-  const city = screen.getByTestId("city").querySelector("input");
-  fireEvent.change(city, { target: { value: "Paris" } });
-
-  const postalCode = screen.getByTestId("postalCode").querySelector("input");
-  fireEvent.change(postalCode, { target: { value: "75001" } });
-
-  const submitButton = screen.getByText(/Submit/i);
-  fireEvent.click(submitButton);
-
-  await waitFor(() => {
-    const errorAlert = screen.getByRole('alert');
-    expect(errorAlert).toBeInTheDocument();
+    await waitFor(() => {
+      const errorAlert = screen.getByRole("alert");
+      expect(errorAlert).toBeInTheDocument();
+      expect(errorAlert).toHaveTextContent(/Corrigez les erreurs/i);
+    });
   });
 
-  const closeButton = screen.getAllByRole("button", { name: /close/i })[0];
-  fireEvent.click(closeButton);
+  test("verify closing error Snackbar message", async () => {
+    render(<Form />);
+    // Remplir le formulaire avec des données invalides
+    const firstName = screen.getByTestId("nom").querySelector("input");
+    fireEvent.change(firstName, { target: { value: "Jean123" } });
 
-  await waitFor(() => {
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    const lastName = screen.getByTestId("prenom").querySelector("input");
+    fireEvent.change(lastName, { target: { value: "Dupont" } });
+
+    const email = screen.getByTestId("email").querySelector("input");
+    fireEvent.change(email, { target: { value: "jean.dupont@example.com" } });
+
+    const dob = screen.getByTestId("dob").querySelector("input");
+    fireEvent.change(dob, { target: { value: "2000-01-01" } });
+
+    const city = screen.getByTestId("city").querySelector("input");
+    fireEvent.change(city, { target: { value: "Paris" } });
+
+    const postalCode = screen.getByTestId("postalCode").querySelector("input");
+    fireEvent.change(postalCode, { target: { value: "75001" } });
+
+    // Soumettre le formulaire pour déclencher l'erreur
+    const submitButton = screen.getByText(/Submit/i);
+    fireEvent.click(submitButton);
+
+    // Attendre l'affichage de l'alerte d'erreur
+    await waitFor(() => {
+      const errorAlert = screen.getByRole("alert");
+      expect(errorAlert).toBeInTheDocument();
+    });
+
+    // Fermer la notification d'erreur
+    const closeButton = screen.getAllByRole("button", { name: /close/i })[0];
+    fireEvent.click(closeButton);
+
+    // Vérifier que la notification d'erreur est fermée
+    await waitFor(() => {
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
   });
-});
 
+  test("verify field errors are cleared when field value becomes valid", async () => {
+    render(<Form />);
 
-test("verify field errors are cleared when field value becomes valid", () => {
-  render(<Form />);
-  
-  const firstName = screen.getByTestId("nom").querySelector("input");
-  
-  fireEvent.change(firstName, { target: { value: "Jean123" } });
-  expect(screen.getByText(/Le champ nom ne doit contenir que des lettres/i)).toBeInTheDocument();
-  
-  fireEvent.change(firstName, { target: { value: "Jean" } });
-  expect(screen.queryByText(/Le champ nom ne doit contenir que des lettres/i)).not.toBeInTheDocument();
+    // Remplir tous les champs avec des valeurs (certaines invalides)
+    const firstName = screen.getByTestId("nom").querySelector("input");
+    fireEvent.change(firstName, { target: { value: "Jean123" } });
 
-  const email = screen.getByTestId("email").querySelector("input");
-  
-  fireEvent.change(email, { target: { value: "invalid-email" } });
-  expect(screen.getByText(/Invalide champs email/i)).toBeInTheDocument();
-  
-  fireEvent.change(email, { target: { value: "valid@example.com" } });
-  expect(screen.queryByText(/Invalide champs email/i)).not.toBeInTheDocument();
-});
+    const lastName = screen.getByTestId("prenom").querySelector("input");
+    fireEvent.change(lastName, { target: { value: "Dupont" } });
 
+    const email = screen.getByTestId("email").querySelector("input");
+    fireEvent.change(email, { target: { value: "jean.dupont@example.com" } });
 
-test("verify age calculation and validation", () => {
-  render(<Form />);
-  const dob = screen.getByTestId("dob").querySelector("input");
-  
-  const futureDate = new Date();
-  futureDate.setFullYear(futureDate.getFullYear() - 10); // 10 ans
-  const formattedFutureDate = futureDate.toISOString().split('T')[0];
-  
-  fireEvent.change(dob, { target: { value: formattedFutureDate } });
-  expect(screen.getByText(/Vous devez avoir plus de 18 ans/i)).toBeInTheDocument();
-  
-  const pastDate = new Date();
-  pastDate.setFullYear(pastDate.getFullYear() - 20); // 20 ans
-  const formattedPastDate = pastDate.toISOString().split('T')[0];
-  
-  fireEvent.change(dob, { target: { value: formattedPastDate } });
-  expect(screen.queryByText(/Vous devez avoir plus de 18 ans/i)).not.toBeInTheDocument();
-});
+    const dob = screen.getByTestId("dob").querySelector("input");
+    const pastDate = new Date();
+    pastDate.setFullYear(pastDate.getFullYear() - 20);
+    const formattedPastDate = pastDate.toISOString().split("T")[0];
+    fireEvent.change(dob, { target: { value: formattedPastDate } });
 
+    const city = screen.getByTestId("city").querySelector("input");
+    fireEvent.change(city, { target: { value: "Paris" } });
 
-test("verify postal code validation", () => {
-  render(<Form />);
-  const postalCode = screen.getByTestId("postalCode").querySelector("input");
-  
-  fireEvent.change(postalCode, { target: { value: "1234" } });  // trop court
-  expect(screen.getByText(/Le code postale doit être au format français/i)).toBeInTheDocument();
-  
-  fireEvent.change(postalCode, { target: { value: "ABCDE" } });  // lettres
-  expect(screen.getByText(/Le code postale doit être au format français/i)).toBeInTheDocument();
-  
-  fireEvent.change(postalCode, { target: { value: "75001" } });
-  expect(screen.queryByText(/Le code postale doit être au format français/i)).not.toBeInTheDocument();
-});
+    const postalCode = screen.getByTestId("postalCode").querySelector("input");
+    fireEvent.change(postalCode, { target: { value: "75001" } });
+
+    // Soumettre le formulaire pour déclencher l'affichage des erreurs
+    const submitButton = screen.getByText(/Submit/i);
+    fireEvent.click(submitButton);
+
+    // Attendre que les erreurs s'affichent
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Le champ nom ne doit contenir que des lettres/i)
+      ).toBeInTheDocument();
+    });
+
+    // Corriger le champ firstName
+    fireEvent.change(firstName, { target: { value: "Jean" } });
+
+    // Vérifier que l'erreur a disparu
+    await waitFor(() => {
+      expect(
+        screen.queryByText(/Le champ nom ne doit contenir que des lettres/i)
+      ).not.toBeInTheDocument();
+    });
+
+    // Pour tester l'email, d'abord le rendre invalide
+    fireEvent.change(email, { target: { value: "invalid-email" } });
+
+    // Soumettre à nouveau pour afficher l'erreur d'email
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Invalide champs email/i)).toBeInTheDocument();
+    });
+
+    // Corriger l'email
+    fireEvent.change(email, { target: { value: "valid@example.com" } });
+
+    // Vérifier que l'erreur d'email a disparu
+    await waitFor(() => {
+      expect(
+        screen.queryByText(/Invalide champs email/i)
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  test("verify age calculation and validation", async () => {
+    render(<Form />);
+
+    // Remplir les champs requis pour pouvoir soumettre
+    const firstName = screen.getByTestId("nom").querySelector("input");
+    fireEvent.change(firstName, { target: { value: "Jean" } });
+
+    const lastName = screen.getByTestId("prenom").querySelector("input");
+    fireEvent.change(lastName, { target: { value: "Dupont" } });
+
+    const email = screen.getByTestId("email").querySelector("input");
+    fireEvent.change(email, { target: { value: "jean.dupont@example.com" } });
+
+    const city = screen.getByTestId("city").querySelector("input");
+    fireEvent.change(city, { target: { value: "Paris" } });
+
+    const postalCode = screen.getByTestId("postalCode").querySelector("input");
+    fireEvent.change(postalCode, { target: { value: "75001" } });
+
+    // Test avec un âge inférieur à 18 ans
+    const dob = screen.getByTestId("dob").querySelector("input");
+    const futureDate = new Date();
+    futureDate.setFullYear(futureDate.getFullYear() - 10); // 10 ans
+    const formattedFutureDate = futureDate.toISOString().split("T")[0];
+
+    fireEvent.change(dob, { target: { value: formattedFutureDate } });
+
+    // Soumettre pour afficher l'erreur
+    const submitButton = screen.getByText(/Submit/i);
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Vous devez avoir plus de 18 ans/i)
+      ).toBeInTheDocument();
+    });
+
+    // Test avec un âge supérieur à 18 ans
+    const pastDate = new Date();
+    pastDate.setFullYear(pastDate.getFullYear() - 20); // 20 ans
+    const formattedPastDate = pastDate.toISOString().split("T")[0];
+
+    fireEvent.change(dob, { target: { value: formattedPastDate } });
+
+    // Vérifier que l'erreur disparaît
+    await waitFor(() => {
+      expect(
+        screen.queryByText(/Vous devez avoir plus de 18 ans/i)
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  test("verify postal code validation", async () => {
+    render(<Form />);
+
+    // Remplir les champs requis pour pouvoir soumettre
+    const firstName = screen.getByTestId("nom").querySelector("input");
+    fireEvent.change(firstName, { target: { value: "Jean" } });
+
+    const lastName = screen.getByTestId("prenom").querySelector("input");
+    fireEvent.change(lastName, { target: { value: "Dupont" } });
+
+    const email = screen.getByTestId("email").querySelector("input");
+    fireEvent.change(email, { target: { value: "jean.dupont@example.com" } });
+
+    const dob = screen.getByTestId("dob").querySelector("input");
+    const pastDate = new Date();
+    pastDate.setFullYear(pastDate.getFullYear() - 20);
+    const formattedPastDate = pastDate.toISOString().split("T")[0];
+    fireEvent.change(dob, { target: { value: formattedPastDate } });
+
+    const city = screen.getByTestId("city").querySelector("input");
+    fireEvent.change(city, { target: { value: "Paris" } });
+
+    // Test avec un code postal invalide
+    const postalCode = screen.getByTestId("postalCode").querySelector("input");
+    fireEvent.change(postalCode, { target: { value: "1234" } }); // trop court
+
+    // Soumettre pour afficher l'erreur
+    const submitButton = screen.getByText(/Submit/i);
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Le code postale doit être au format français/i)
+      ).toBeInTheDocument();
+    });
+
+    // Test avec des lettres
+    fireEvent.change(postalCode, { target: { value: "ABCDE" } });
+    fireEvent.click(submitButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Le code postale doit être au format français/i)
+      ).toBeInTheDocument();
+    });
+
+    // Test avec un code postal valide
+    fireEvent.change(postalCode, { target: { value: "75001" } });
+
+    // Vérifier que l'erreur disparaît
+    await waitFor(() => {
+      expect(
+        screen.queryByText(/Le code postale doit être au format français/i)
+      ).not.toBeInTheDocument();
+    });
+  });
 });
