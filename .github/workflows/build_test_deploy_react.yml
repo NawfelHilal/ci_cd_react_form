@@ -41,15 +41,18 @@ jobs:
           # Upload entire repository
           path: react-form/build
           if-no-files-found: error
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v3
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-
+      - name: Deploy to Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
         with:
           artifact-path: react-form/build
           target: gh-pages
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          directory: ./react-form/
+        env: ${{ secrets.CODECOV_TOKEN }}
 
   deploy:
     environment:
