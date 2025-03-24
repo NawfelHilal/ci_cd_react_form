@@ -48,13 +48,6 @@ jobs:
           # Upload entire repository
           path: react-form/build
           if-no-files-found: error
-      - name: Deploy to Pages
-        id: deploy
-        uses: actions/deploy-pages@v4
-        with:
-          artifact-path: react-form/build
-          target: gh-pages
-          token: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     environment:
