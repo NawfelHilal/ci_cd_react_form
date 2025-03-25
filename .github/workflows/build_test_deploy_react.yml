@@ -49,11 +49,15 @@ jobs:
 
       - name: build and publish package on NPM 📦
         run: |
+          cd react-form
           git config --global user.email "nawfelhilal13@gmail.com"
           git config --global user.name "Nawfel Hilal"
           npm run build-npm-ci
           npm version patch
           npm publish
+          git add . 
+          git commit -m "updated version"
+          git push
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Upload artifact
