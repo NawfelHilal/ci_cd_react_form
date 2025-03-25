@@ -54,19 +54,39 @@ jobs:
           git config --global user.email "nawfelhilal13@gmail.com"
           git config --global user.name "Nawfel Hilal"
 
-          # Incrémentation auto
-          npm version patch --no-git-tag-version
-          echo "📦 Version: $(node -p \"require('./package.json').version\")"
+          # Récupérer la version actuelle
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT_VERSION"
 
-          # Commit la nouvelle version avant de publier
-          git add .
-          git commit -m "chore: bump version [skip ci]" || echo "No version change"
-          git push 
+          # Vérifier si la version existe déjà sur npm
+          if npm view ynov-ci-cd-nawfel@$CURRENT_VERSION version &>/dev/null; then
+            echo "Version $CURRENT_VERSION already exists, incrementing..."
+            npm version patch
+            VERSION_UPDATE=true
+          else
+            echo "Version $CURRENT_VERSION does not exist yet"
+            VERSION_UPDATE=false
+          fi
 
+          # Récupérer la nouvelle version (qui peut être la même si pas d'incrémentation)
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "Version to publish: $NEW_VERSION"
 
+          # Construire le package
           npm run build-npm-ci
-          npm publish --access public
 
+          # Publier seulement si la version a été mise à jour ou n'existe pas encore
+          if [ "$VERSION_UPDATE" = "true" ] || [ "$CURRENT_VERSION" = "$NEW_VERSION" ] && ! npm view ynov-ci-cd-nawfel@$NEW_VERSION version &>/dev/null; then
+            echo "Publishing version $NEW_VERSION"
+            npm publish --access public
+            
+            # Commit et push seulement si des changements ont été faits
+            git add .
+            git commit -m "Updated version to $NEW_VERSION" || echo "No changes to commit"
+            git push || echo "No changes to push"
+          else
+            echo "Skipping publish as version $NEW_VERSION already exists"
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Upload artifact
