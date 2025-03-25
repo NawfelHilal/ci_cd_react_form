@@ -53,7 +53,14 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           git config --global user.email "nawfelhilal13@gmail.com"
           git config --global user.name "Nawfel Hilal"
-          npm version patch
+
+           # Vérifier si la version actuelle est déjà publiée
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          if npm view ynov-ci-cd-nawfel@$CURRENT_VERSION version &>/dev/null; then
+            # Si la version existe déjà, incrémenter la version
+            npm version patch
+          fi
+
           npm run build-npm-ci
           npm publish --access public
           git add . 
