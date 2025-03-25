@@ -54,13 +54,13 @@ jobs:
           git config --global user.name "Nawfel Hilal"
           npm run build-npm-ci
           npm version patch
+          - run: cat ~/.npmrc
           npm publish --access public
           git add . 
           git commit -m "updated version"
           git push
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
