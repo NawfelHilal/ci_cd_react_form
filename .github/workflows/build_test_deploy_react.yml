@@ -60,6 +60,7 @@ jobs:
           git push
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
