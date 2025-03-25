@@ -50,11 +50,11 @@ jobs:
       - name: build and publish package on NPM 📦
         run: |
           cd react-form
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           git config --global user.email "nawfelhilal13@gmail.com"
           git config --global user.name "Nawfel Hilal"
           npm run build-npm-ci
           npm version patch
-          - run: cat ~/.npmrc
           npm publish --access public
           git add . 
           git commit -m "updated version"
