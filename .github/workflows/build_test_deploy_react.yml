@@ -56,39 +56,28 @@ jobs:
           git config --global user.email "nawfelhilal13@gmail.com"
           git config --global user.name "Nawfel Hilal"
 
-
-          # Récupérer la version actuelle
+          # Récupérer la version actuelle depuis package.json
           CURRENT_VERSION=$(node -p "require('./package.json').version")
-          echo "Current version: $CURRENT_VERSION"
+          echo "Version from package.json: $CURRENT_VERSION"
 
           # Vérifier si la version existe déjà sur npm
           if npm view ynov-ci-cd-nawfel@$CURRENT_VERSION version &>/dev/null; then
-            echo "Version $CURRENT_VERSION already exists, incrementing..."
-            npm version patch
-            VERSION_UPDATE=true
+            echo "Version $CURRENT_VERSION already exists on npm, skipping publish"
+            SHOULD_PUBLISH=false
           else
-            echo "Version $CURRENT_VERSION does not exist yet"
-            VERSION_UPDATE=false
+            echo "Version $CURRENT_VERSION does not exist on npm yet, will publish"
+            SHOULD_PUBLISH=true
           fi
-
-          # Récupérer la nouvelle version (qui peut être la même si pas d'incrémentation)
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          echo "Version to publish: $NEW_VERSION"
 
           # Construire le package
           npm run build-npm-ci
 
-          # Publier seulement si la version a été mise à jour ou n'existe pas encore
-          if [ "$VERSION_UPDATE" = "true" ] || [ "$CURRENT_VERSION" = "$NEW_VERSION" ] && ! npm view ynov-ci-cd-nawfel@$NEW_VERSION version &>/dev/null; then
-            echo "Publishing version $NEW_VERSION"
+          # Publier seulement si la version n'existe pas encore
+          if [ "$SHOULD_PUBLISH" = "true" ]; then
+            echo "Publishing version $CURRENT_VERSION"
             npm publish --access public
-            
-            # Commit et push seulement si des changements ont été faits
-            git add .
-            git commit -m "Updated version to $NEW_VERSION" || echo "No changes to commit"
-            git push || echo "No changes to push"
           else
-            echo "Skipping publish as version $NEW_VERSION already exists"
+            echo "Skipping publish as version $CURRENT_VERSION already exists on npm"
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
