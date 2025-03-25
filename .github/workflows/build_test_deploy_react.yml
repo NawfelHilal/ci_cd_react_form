@@ -53,8 +53,8 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
           git config --global user.email "nawfelhilal13@gmail.com"
           git config --global user.name "Nawfel Hilal"
-          npm run build-npm-ci
           npm version patch
+          npm run build-npm-ci
           npm publish --access public
           git add . 
           git commit -m "updated version"
