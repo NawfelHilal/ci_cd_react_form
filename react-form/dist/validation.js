@@ -15,8 +15,8 @@ exports.validatePostalCode = exports.validateName = exports.validateEmail = expo
  * // Retourne false
  * validateEmail("invalid-email");
  */
-var validateEmail = exports.validateEmail = function validateEmail(email) {
-  var re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const validateEmail = email => {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(String(email).toLowerCase());
 };
 
@@ -31,8 +31,9 @@ var validateEmail = exports.validateEmail = function validateEmail(email) {
  * // Retourne false
  * validatePostalCode("ABC12");
  */
-var validatePostalCode = exports.validatePostalCode = function validatePostalCode(postalCode) {
-  var re = /^[0-9]{5}$/; // French postal code format
+exports.validateEmail = validateEmail;
+const validatePostalCode = postalCode => {
+  const re = /^[0-9]{5}$/; // French postal code format
   return re.test(postalCode);
 };
 
@@ -45,10 +46,11 @@ var validatePostalCode = exports.validatePostalCode = function validatePostalCod
  * // Si aujourd'hui est 2025-03-24, retourne 25
  * calculateAge("2000-01-01");
  */
-var calculateAge = exports.calculateAge = function calculateAge(date) {
+exports.validatePostalCode = validatePostalCode;
+const calculateAge = date => {
   date = new Date(date);
-  var dateDiff = new Date(Date.now() - date.getTime());
-  var age = Math.abs(dateDiff.getUTCFullYear() - 1970);
+  let dateDiff = new Date(Date.now() - date.getTime());
+  let age = Math.abs(dateDiff.getUTCFullYear() - 1970);
   return age;
 };
 
@@ -64,8 +66,9 @@ var calculateAge = exports.calculateAge = function calculateAge(date) {
  * // Retourne false
  * validateName("Jean123");
  */
-var validateName = exports.validateName = function validateName(name) {
-  var re = /^[a-zA-ZÀ-ÿ\s'-]+$/; // Allows letters, accents, spaces, hyphens, and apostrophes
+exports.calculateAge = calculateAge;
+const validateName = name => {
+  const re = /^[a-zA-ZÀ-ÿ\s'-]+$/; // Allows letters, accents, spaces, hyphens, and apostrophes
   return re.test(name);
 };
 
@@ -81,7 +84,9 @@ var validateName = exports.validateName = function validateName(name) {
  * // Retourne false
  * validateCity("Paris123");
  */
-var validateCity = exports.validateCity = function validateCity(city) {
-  var re = /^[a-zA-ZÀ-ÿ\s'-]+$/; // Allows letters, accents, spaces, hyphens, and apostrophes
+exports.validateName = validateName;
+const validateCity = city => {
+  const re = /^[a-zA-ZÀ-ÿ\s'-]+$/; // Allows letters, accents, spaces, hyphens, and apostrophes
   return re.test(city);
 };
+exports.validateCity = validateCity;
