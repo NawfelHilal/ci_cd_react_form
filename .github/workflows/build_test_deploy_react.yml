@@ -54,7 +54,7 @@ jobs:
           git config --global user.name "Nawfel Hilal"
           npm run build-npm-ci
           npm version patch
-          npm publish
+          npm publish --access public
           git add . 
           git commit -m "updated version"
           git push
