@@ -39,6 +39,11 @@ Ce projet utilise GitHub Actions pour automatiser :
 
 Le workflow est déclenché à chaque push ou pull request sur la branche main.
 
+Déploiement sur npm :
+
+Le déploiement sur npm est automatique lorsque la version est modifiée dans le fichier package.json.
+Toujours vérifier que la version n'existe pas déjà sur npm avant de publier.
+
 ## Installation et utilisation
 
 ### Prérequis
