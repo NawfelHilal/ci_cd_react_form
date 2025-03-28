@@ -15,6 +15,23 @@ import {
   validateCity,
 } from "../validation";
 
+/**
+ * Composant de formulaire d'inscription
+ * @component
+ * @returns {JSX.Element} Formulaire avec validation des champs
+ * @example
+ * // Utilisation du composant
+ * <Form />
+ *
+ * // Rendu:
+ * // Un formulaire avec des champs pour:
+ * // - Nom
+ * // - Prénom
+ * // - Email
+ * // - Date de naissance
+ * // - Ville
+ * // - Code postal
+ */
 const Form = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -28,6 +45,13 @@ const Form = () => {
   const [openSuccess, setOpenSuccess] = useState(false);
   const [submitted, setSubmitted] = useState(false); // Nouvel état pour suivre si le formulaire a été soumis
 
+  /**
+   * Réinitialise tous les champs du formulaire
+   * @function
+   * @returns {void} Ne retourne rien
+   * @example
+   * resetForm(); // Réinitialise tous les champs à leur état initial
+   */
   const resetForm = () => {
     setFirstName("");
     setLastName("");
@@ -40,7 +64,14 @@ const Form = () => {
     setSubmitted(false); // Réinitialiser l'état de soumission
   };
 
-  // Simplifiez tous les gestionnaires de changement pour ne pas afficher d'erreurs pendant la saisie
+  /**
+   * Gère le changement du champ prénom
+   * @function
+   * @param {React.ChangeEvent<HTMLInputElement>} e - Événement de changement
+   * @returns {void} Ne retourne rien
+   * @example
+   * <TextField onChange={handleFirstNameChange} />
+   */
   const handleFirstNameChange = (e) => {
     const value = e.target.value;
     setFirstName(value);
@@ -53,6 +84,14 @@ const Form = () => {
     }
   };
 
+  /**
+   * Gère le changement du champ nom
+   * @function
+   * @param {React.ChangeEvent<HTMLInputElement>} e - Événement de changement
+   * @returns {void} Ne retourne rien
+   * @example
+   * <TextField onChange={handleLastNameChange} />
+   */
   const handleLastNameChange = (e) => {
     const value = e.target.value;
     setLastName(value);
@@ -64,6 +103,14 @@ const Form = () => {
     }
   };
 
+  /**
+   * Gère le changement du champ email
+   * @function
+   * @param {React.ChangeEvent<HTMLInputElement>} e - Événement de changement
+   * @returns {void} Ne retourne rien
+   * @example
+   * <TextField onChange={handleEmailChange} />
+   */
   const handleEmailChange = (e) => {
     const value = e.target.value;
     setEmail(value);
@@ -75,6 +122,14 @@ const Form = () => {
     }
   };
 
+  /**
+   * Gère le changement du champ date de naissance
+   * @function
+   * @param {React.ChangeEvent<HTMLInputElement>} e - Événement de changement
+   * @returns {void} Ne retourne rien
+   * @example
+   * <TextField type="date" onChange={handleDobChange} />
+   */
   const handleDobChange = (e) => {
     const value = e.target.value;
     setDob(value);
@@ -86,6 +141,14 @@ const Form = () => {
     }
   };
 
+  /**
+   * Gère le changement du champ ville
+   * @function
+   * @param {React.ChangeEvent<HTMLInputElement>} e - Événement de changement
+   * @returns {void} Ne retourne rien
+   * @example
+   * <TextField onChange={handleCityChange} />
+   */
   const handleCityChange = (e) => {
     const value = e.target.value;
     setCity(value);
@@ -97,6 +160,14 @@ const Form = () => {
     }
   };
 
+  /**
+   * Gère le changement du champ code postal
+   * @function
+   * @param {React.ChangeEvent<HTMLInputElement>} e - Événement de changement
+   * @returns {void} Ne retourne rien
+   * @example
+   * <TextField onChange={handlePostalCodeChange} />
+   */
   const handlePostalCodeChange = (e) => {
     const value = e.target.value;
     setPostalCode(value);
@@ -108,6 +179,16 @@ const Form = () => {
     }
   };
 
+  /**
+   * Gère la soumission du formulaire
+   * @function
+   * @param {React.FormEvent<HTMLFormElement>} e - Événement de soumission
+   * @returns {void} Ne retourne rien
+   * @example
+   * <form onSubmit={handleSubmit}>
+   *   // ... champs du formulaire
+   * </form>
+   */
   const handleSubmit = (e) => {
     e.preventDefault();
     setSubmitted(true); // Marquer le formulaire comme soumis
@@ -166,15 +247,36 @@ const Form = () => {
     setOpenSuccess(true);
   };
 
+  /**
+   * Ferme la notification d'erreur
+   * @function
+   * @returns {void} Ne retourne rien
+   * @example
+   * <Snackbar onClose={handleCloseError} />
+   */
   const handleCloseError = () => {
     setOpenError(false);
   };
 
+  /**
+   * Ferme la notification de succès
+   * @function
+   * @returns {void} Ne retourne rien
+   * @example
+   * <Snackbar onClose={handleCloseSuccess} />
+   */
   const handleCloseSuccess = () => {
     setOpenSuccess(false);
   };
 
-  // Modifier pour que le bouton soit activé si tous les champs ont une valeur, même s'il y a des erreurs
+  /**
+   * Vérifie si le formulaire est valide pour la soumission
+   * @function
+   * @returns {boolean} True si tous les champs requis sont remplis
+   * @example
+   * const submitButtonDisabled = !isFormValid();
+   * <Button disabled={submitButtonDisabled}>Submit</Button>
+   */
   const isFormValid = () => {
     return firstName && lastName && email && dob && city && postalCode;
   };

@@ -10,7 +10,7 @@ import {
   validateCity,
 } from "../validation";
 
-describe("Form Component", () => {
+describe("Form Unit Tests", () => {
   test("renders form", () => {
     render(<Form />);
     const formElement = screen.getByText(/Form/i);
@@ -278,7 +278,6 @@ describe("Form Component", () => {
 
   test("verify closing error Snackbar message", async () => {
     render(<Form />);
-    // Remplir le formulaire avec des données invalides
     const firstName = screen.getByTestId("nom").querySelector("input");
     fireEvent.change(firstName, { target: { value: "Jean123" } });
 
@@ -297,17 +296,14 @@ describe("Form Component", () => {
     const postalCode = screen.getByTestId("postalCode").querySelector("input");
     fireEvent.change(postalCode, { target: { value: "75001" } });
 
-    // Soumettre le formulaire pour déclencher l'erreur
     const submitButton = screen.getByText(/Submit/i);
     fireEvent.click(submitButton);
 
-    // Attendre l'affichage de l'alerte d'erreur
     await waitFor(() => {
       const errorAlert = screen.getByRole("alert");
       expect(errorAlert).toBeInTheDocument();
     });
 
-    // Fermer la notification d'erreur
     const closeButton = screen.getAllByRole("button", { name: /close/i })[0];
     fireEvent.click(closeButton);
 
@@ -342,41 +338,33 @@ describe("Form Component", () => {
     const postalCode = screen.getByTestId("postalCode").querySelector("input");
     fireEvent.change(postalCode, { target: { value: "75001" } });
 
-    // Soumettre le formulaire pour déclencher l'affichage des erreurs
     const submitButton = screen.getByText(/Submit/i);
     fireEvent.click(submitButton);
 
-    // Attendre que les erreurs s'affichent
     await waitFor(() => {
       expect(
         screen.getByText(/Le champ nom ne doit contenir que des lettres/i)
       ).toBeInTheDocument();
     });
 
-    // Corriger le champ firstName
     fireEvent.change(firstName, { target: { value: "Jean" } });
 
-    // Vérifier que l'erreur a disparu
     await waitFor(() => {
       expect(
         screen.queryByText(/Le champ nom ne doit contenir que des lettres/i)
       ).not.toBeInTheDocument();
     });
 
-    // Pour tester l'email, d'abord le rendre invalide
     fireEvent.change(email, { target: { value: "invalid-email" } });
 
-    // Soumettre à nouveau pour afficher l'erreur d'email
     fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(screen.getByText(/Invalide champs email/i)).toBeInTheDocument();
     });
 
-    // Corriger l'email
     fireEvent.change(email, { target: { value: "valid@example.com" } });
 
-    // Vérifier que l'erreur d'email a disparu
     await waitFor(() => {
       expect(
         screen.queryByText(/Invalide champs email/i)
@@ -387,7 +375,6 @@ describe("Form Component", () => {
   test("verify age calculation and validation", async () => {
     render(<Form />);
 
-    // Remplir les champs requis pour pouvoir soumettre
     const firstName = screen.getByTestId("nom").querySelector("input");
     fireEvent.change(firstName, { target: { value: "Jean" } });
 
@@ -411,7 +398,6 @@ describe("Form Component", () => {
 
     fireEvent.change(dob, { target: { value: formattedFutureDate } });
 
-    // Soumettre pour afficher l'erreur
     const submitButton = screen.getByText(/Submit/i);
     fireEvent.click(submitButton);
 
