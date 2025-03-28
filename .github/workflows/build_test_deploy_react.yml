@@ -38,6 +38,8 @@ jobs:
           cd react-form
           npm ci
           npm run jsdoc
+          # S'assurer que la documentation est copiée dans le dossier build
+          cp -r public/docs build/docs
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v3
@@ -84,7 +86,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload entire repository
+          # Upload le dossier build qui contient maintenant la doc
           path: react-form/build
           if-no-files-found: error
 
