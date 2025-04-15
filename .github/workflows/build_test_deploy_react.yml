@@ -86,7 +86,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload le dossier build qui contient maintenant la doc
+          # Upload entire repository
           path: react-form/build
           if-no-files-found: error
 
