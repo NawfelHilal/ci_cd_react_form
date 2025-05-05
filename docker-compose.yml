@@ -1,19 +1,55 @@
-version: '3.1'
+version: '3'
 
 services:
   db:
     image: mysql:latest
     volumes:
-      - ./sqlfiles/:/docker-entrypoint-initdb.d
+      - ./sqlfiles/:/docker-entrypoint-initdb.d/
     restart: always
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_DATABASE=ynov_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
 
   adminer:
     image: adminer
     restart: always
     ports:
       - 8080:8080
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+
+  api:
+    build: 
+      context: ./react-form/server
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=root
+      - MYSQL_ROOT_PASSWORD=ynovpwd
+      - MYSQL_DATABASE=ynov_ci
+    restart: always
+    depends_on:
+      - db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+
+  frontend:
+    build:
+      context: ./react-form
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    volumes:
+      - ./react-form:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
 
     

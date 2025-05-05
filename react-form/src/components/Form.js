@@ -14,6 +14,7 @@ import {
   validateName,
   validateCity,
 } from "../validation";
+import { userService } from "../services/api";
 
 /**
  * Composant de formulaire d'inscription
@@ -189,9 +190,9 @@ const Form = () => {
    *   // ... champs du formulaire
    * </form>
    */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true); // Marquer le formulaire comme soumis
+    setSubmitted(true);
 
     // Vérifier tous les champs pour les erreurs
     const errors = {};
@@ -232,19 +233,24 @@ const Form = () => {
       return;
     }
 
-    // Si tout est valide, enregistrer et afficher le toaster de succès
-    const formData = {
-      firstName,
-      lastName,
-      email,
-      dob,
-      city,
-      postalCode,
-    };
+    try {
+      const formData = {
+        firstName,
+        lastName,
+        email,
+        dob,
+        city,
+        postalCode,
+      };
 
-    localStorage.setItem("registrationData", JSON.stringify(formData));
-    resetForm();
-    setOpenSuccess(true);
+      // Appel au service API pour créer l'utilisateur
+      await userService.createUser(formData);
+      setOpenSuccess(true);
+      resetForm();
+    } catch (error) {
+      setError("Erreur lors de l'enregistrement de l'utilisateur.");
+      setOpenError(true);
+    }
   };
 
   /**
