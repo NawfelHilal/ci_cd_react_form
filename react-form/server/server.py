@@ -17,11 +17,9 @@ class User(BaseModel):
 
 
 app = FastAPI()
-origins = [
-    "http://localhost:3000",  # React app en développement local
-    "http://frontend:3000",  # React app dans Docker
-]
 
+# Configuration CORS
+origins = ["*"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -31,51 +29,56 @@ app.add_middleware(
 )
 
 
-@app.get("/users")
-async def get_users():
-    # Create a connection to the database
-    conn = mysql.connector.connect(
-        database=os.getenv("MYSQL_DATABASE"),
-        user=os.getenv("MYSQL_USER"),
-        password=os.getenv("MYSQL_ROOT_PASSWORD"),
-        host=os.getenv("MYSQL_HOST"),
+def get_db_connection():
+    return mysql.connector.connect(
+        host=os.getenv("MYSQL_HOST", "db"),
+        user=os.getenv("MYSQL_USER", "root"),
+        password=os.getenv("MYSQL_ROOT_PASSWORD", "ynovpwd"),
+        database=os.getenv("MYSQL_DATABASE", "ynov_ci"),
     )
 
-    cursor = conn.cursor()
-    sql_select_Query = "select * from users"
-    cursor.execute(sql_select_Query)
-    # get all records
-    records = cursor.fetchall()
-    print("Total number of rows in table: ", cursor.rowcount)
-    # renvoyer nos données et 200 code OK
-    return {"users": records}
+
+@app.get("/users")
+async def get_users():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM users")
+        users = cursor.fetchall()
+        print("Users from database:", users)
+        cursor.close()
+        conn.close()
+        return {"users": users}
+    except Exception as e:
+        print("Database error:", str(e))
+        return {"users": [], "error": str(e)}
 
 
 @app.post("/users")
 async def create_user(user: User):
-    # Create a connection to the database
-    conn = mysql.connector.connect(
-        database=os.getenv("MYSQL_DATABASE"),
-        user=os.getenv("MYSQL_USER"),
-        password=os.getenv("MYSQL_ROOT_PASSWORD"),
-        host=os.getenv("MYSQL_HOST"),
-    )
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        sql_insert_query = """
+        INSERT INTO users (firstName, lastName, email, dob, city, postalCode)
+        VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        values = (
+            user.firstName,
+            user.lastName,
+            user.email,
+            user.dob,
+            user.city,
+            user.postalCode,
+        )
 
-    cursor = conn.cursor()
-    sql_insert_query = """
-    INSERT INTO users (firstName, lastName, email, dob, city, postalCode)
-    VALUES (%s, %s, %s, %s, %s, %s)
-    """
-    values = (
-        user.firstName,
-        user.lastName,
-        user.email,
-        user.dob,
-        user.city,
-        user.postalCode,
-    )
+        cursor.execute(sql_insert_query, values)
+        conn.commit()  # Important : commit les changements
 
-    cursor.execute(sql_insert_query, values)
-    conn.commit()
+        cursor.close()
+        conn.close()
 
-    return {"message": "User created successfully", "user": user.dict()}
+        return {"message": "User created successfully", "user": user.dict()}
+    except Exception as e:
+        print("Database error:", str(e))
+        return {"error": str(e)}

@@ -1,6 +1,6 @@
 USE ynov_ci;
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     firstName VARCHAR(50) NOT NULL,
     lastName VARCHAR(50) NOT NULL,
@@ -9,4 +9,4 @@ CREATE TABLE users (
     city VARCHAR(100) NOT NULL,
     postalCode CHAR(5) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-); 
+);
