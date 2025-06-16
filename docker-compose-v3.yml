@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:8.0
+    volumes:
+      - ./sqlfiles/:/docker-entrypoint-initdb.d/
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=ynovpwd
+    ports:
+      - "3306:3306"
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+    depends_on:
+      - db
+
+  api:
+    build: 
+      context: ./react-form/server
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=root
+      - MYSQL_ROOT_PASSWORD=ynovpwd
+      - MYSQL_DATABASE=ynov_ci
+    restart: always
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./react-form
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    volumes:
+      - ./react-form:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    command: sh -c "npm install && npm start" 
