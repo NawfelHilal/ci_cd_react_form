@@ -25,12 +25,6 @@ jobs:
       - name: Build the stack
         run: docker compose up -d
 
-      - name: Install dependencies
-        working-directory: react-form
-        run: |
-          npm install
-          npm install cypress @testing-library/cypress --save-dev
-
       - name: Run e2e tests with cypress
         uses: cypress-io/github-action@v6
         with:
