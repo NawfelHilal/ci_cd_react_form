@@ -21,6 +21,16 @@ jobs:
 
       - name: Run e2e tests with cypress
         uses: cypress-io/github-action@v6
+        with:
+          working-directory: react-form
+          install-command: npm install
+          start: npm start
+          wait-on: "http://localhost:3000"
+          config: baseUrl=http://localhost:3000
+          spec: cypress/e2e/form.cy.js
+          browser: chrome
+          record: false
+          config-file: cypress.config.js
 
       - name: Stop the stack
         if: always()
