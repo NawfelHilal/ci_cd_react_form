@@ -13,38 +13,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-          cache: "npm"
-
       - name: Set up Docker
         uses: docker/setup-buildx-action@v3
 
       - name: Build the stack
-        run: docker compose -f docker-compose-v3.yml up -d
-        env:
-          MYSQL_ROOT_PASSWORD: ynovpwd
-
-      - name: Install dependencies and Cypress
-        working-directory: react-form
-        run: |
-          npm install
-          npm install cypress @testing-library/cypress --save-dev
+        run: docker compose up -d
 
       - name: Run e2e tests with cypress
         uses: cypress-io/github-action@v6
-        with:
-          working-directory: react-form
-          install-command: npm install
-          start: npm start
-          wait-on: "http://localhost:3000"
-          config: baseUrl=http://localhost:3000
-          spec: cypress/e2e/**/*.cy.js
-          browser: chrome
-          record: false
 
       - name: Stop the stack
         if: always()
-        run: docker compose -f docker-compose-v3.yml down
+        run: docker compose down
