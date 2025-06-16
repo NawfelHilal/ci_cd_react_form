@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   TextField,
   Button,
@@ -44,7 +44,29 @@ const Form = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const [openError, setOpenError] = useState(false);
   const [openSuccess, setOpenSuccess] = useState(false);
-  const [submitted, setSubmitted] = useState(false); // Nouvel état pour suivre si le formulaire a été soumis
+  const [submitted, setSubmitted] = useState(false);
+
+  // Charger les données du localStorage au montage du composant
+  useEffect(() => {
+    try {
+      const savedData = localStorage.getItem("formData");
+      if (savedData) {
+        const parsedData = JSON.parse(savedData);
+        if (parsedData && typeof parsedData === "object") {
+          setFirstName(parsedData.firstName || "");
+          setLastName(parsedData.lastName || "");
+          setEmail(parsedData.email || "");
+          setDob(parsedData.dob || "");
+          setCity(parsedData.city || "");
+          setPostalCode(parsedData.postalCode || "");
+        }
+      }
+    } catch (error) {
+      console.error("Error loading form data:", error);
+      // En cas d'erreur, réinitialiser le localStorage
+      localStorage.removeItem("formData");
+    }
+  }, []);
 
   /**
    * Réinitialise tous les champs du formulaire
@@ -243,10 +265,15 @@ const Form = () => {
         postalCode,
       };
 
+      // Sauvegarder les données dans le localStorage avant l'appel API
+      localStorage.setItem("formData", JSON.stringify(formData));
+
       // Appel au service API pour créer l'utilisateur
       await userService.createUser(formData);
       setOpenSuccess(true);
       resetForm();
+      // Supprimer les données du localStorage après une soumission réussie
+      localStorage.removeItem("formData");
     } catch (error) {
       setError("Erreur lors de l'enregistrement de l'utilisateur.");
       setOpenError(true);
@@ -284,7 +311,14 @@ const Form = () => {
    * <Button disabled={submitButtonDisabled}>Submit</Button>
    */
   const isFormValid = () => {
-    return firstName && lastName && email && dob && city && postalCode;
+    return (
+      firstName.trim() !== "" &&
+      lastName.trim() !== "" &&
+      email.trim() !== "" &&
+      dob.trim() !== "" &&
+      city.trim() !== "" &&
+      postalCode.trim() !== ""
+    );
   };
 
   return (
