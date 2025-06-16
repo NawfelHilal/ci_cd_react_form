@@ -21,6 +21,11 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: ynovpwd
 
+      - name: Install Cypress
+        run: |
+          cd react-form
+          npm install cypress @testing-library/cypress --save-dev
+
       - name: Run e2e tests with cypress
         uses: cypress-io/github-action@v6
         with:
@@ -29,6 +34,9 @@ jobs:
           start: npm start
           wait-on: "http://localhost:3000"
           config: baseUrl=http://localhost:3000
+          spec: cypress/e2e/**/*.cy.js
+          browser: chrome
+          record: false
 
       - name: Stop the stack
         if: always()
