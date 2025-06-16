@@ -27,7 +27,7 @@ jobs:
           start: npm start
           wait-on: "http://localhost:3000"
           config: baseUrl=http://localhost:3000
-          spec: cypress/e2e/form.cy.js
+          spec: cypress/e2e/spec.cy.js
           browser: chrome
           record: false
           config-file: cypress.config.js
