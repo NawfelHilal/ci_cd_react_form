@@ -23,7 +23,8 @@
     "test": "react-scripts test --coverage --watchAll=false",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "cypress": "cypress open"
   },
   "eslintConfig": {
     "extends": [
@@ -52,6 +53,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^14.6.1",
+    "cypress": "^14.4.1",
     "jsdoc": "^4.0.4",
     "react-test-renderer": "^19.0.0"
   }

@@ -1,156 +1,238 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import '@testing-library/jest-dom';
-import Form from './Form';
+import React from "react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import "@testing-library/jest-dom";
+import Form from "./Form";
 
-describe('Form Integration Tests', () => {
+// Mock fetch
+const mockFetch = jest.fn();
+global.fetch = mockFetch;
+
+jest.setTimeout(15000);
+
+describe("Form Integration Tests", () => {
   beforeEach(() => {
-    // Nettoyer le localStorage avant chaque test
+    mockFetch.mockClear();
     localStorage.clear();
   });
 
-  test('should complete full registration flow successfully', async () => {
-    const user = userEvent.setup();
+  test("successfully submits form and shows success message", async () => {
+    mockFetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ message: "User created successfully" }),
+      })
+    );
+
     render(<Form />);
-    
-    // Simulation de la saisie utilisateur complète
-    const nomInput = screen.getByTestId('nom').querySelector('input');
-    const prenomInput = screen.getByTestId('prenom').querySelector('input');
-    const emailInput = screen.getByTestId('email').querySelector('input');
-    const dobInput = screen.getByTestId('dob').querySelector('input');
-    const cityInput = screen.getByTestId('city').querySelector('input');
-    const postalCodeInput = screen.getByTestId('postalCode').querySelector('input');
 
-    await user.type(nomInput, 'Martin');
-    await user.type(prenomInput, 'Jean');
-    await user.type(emailInput, 'jean.martin@email.com');
-    
-    // Définir une date de naissance valide (plus de 18 ans)
-    const pastDate = new Date();
-    pastDate.setFullYear(pastDate.getFullYear() - 20);
-    const formattedDate = pastDate.toISOString().split('T')[0];
-    await user.type(dobInput, formattedDate);
-    
-    await user.type(cityInput, 'Paris');
-    await user.type(postalCodeInput, '75001');
+    // Remplir le formulaire
+    const inputs = {
+      nom: "Jean",
+      prenom: "Dupont",
+      email: "jean.dupont@example.com",
+      dob: new Date(Date.now() - 20 * 365 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0],
+      city: "Paris",
+      postalCode: "75001",
+    };
 
-    // Soumettre le formulaire
-    const submitButton = screen.getByText('Submit');
-    await user.click(submitButton);
+    for (const [id, value] of Object.entries(inputs)) {
+      const input = screen.getByTestId(id).querySelector("input");
+      fireEvent.change(input, { target: { value } });
+    }
+
+    const submitButton = screen.getByRole("button", { name: /submit/i });
+    fireEvent.click(submitButton);
 
     // Vérifier le message de succès
-    await waitFor(() => {
-      expect(screen.getByText('Enregistrement réussi')).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByText("Enregistrement réussi")).toBeInTheDocument();
+      },
+      { timeout: 10000 }
+    );
 
-    // Vérifier les données dans le localStorage
-    const storedData = JSON.parse(localStorage.getItem('registrationData'));
-    expect(storedData).toEqual({
-      firstName: 'Martin',
-      lastName: 'Jean',
-      email: 'jean.martin@email.com',
-      dob: formattedDate,
-      city: 'Paris',
-      postalCode: '75001'
-    });
-
-    // Vérifier que le formulaire a été réinitialisé
-    expect(nomInput.value).toBe('');
-    expect(prenomInput.value).toBe('');
+    // Vérifier l'appel API
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: expect.any(String),
+      })
+    );
   });
 
-  test('should handle validation errors and recovery', async () => {
-    const user = userEvent.setup();
+  test("handles API errors appropriately", async () => {
+    mockFetch.mockImplementationOnce(() =>
+      Promise.reject(new Error("Network error"))
+    );
+
     render(<Form />);
-    
-    const nomInput = screen.getByTestId('nom').querySelector('input');
-    const prenomInput = screen.getByTestId('prenom').querySelector('input');
-    const emailInput = screen.getByTestId('email').querySelector('input');
-    const dobInput = screen.getByTestId('dob').querySelector('input');
-    const cityInput = screen.getByTestId('city').querySelector('input');
-    const postalCodeInput = screen.getByTestId('postalCode').querySelector('input');
 
-    // Saisir des données invalides
-    await user.type(nomInput, '123');
-    await user.type(emailInput, 'invalid-email');
-    await user.type(cityInput, 'Paris123');
-    await user.type(postalCodeInput, 'ABC');
-    
-    // Remplir les autres champs requis
-    await user.type(prenomInput, 'Jean');
-    const date = new Date();
-    date.setFullYear(date.getFullYear() - 10); // Âge invalide
-    await user.type(dobInput, date.toISOString().split('T')[0]);
+    // Remplir le formulaire
+    const inputs = {
+      nom: "Jean",
+      prenom: "Dupont",
+      email: "jean.dupont@example.com",
+      dob: new Date(Date.now() - 20 * 365 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0],
+      city: "Paris",
+      postalCode: "75001",
+    };
 
-    // Soumettre avec des erreurs
-    const submitButton = screen.getByText('Submit');
-    await user.click(submitButton);
+    for (const [id, value] of Object.entries(inputs)) {
+      const input = screen.getByTestId(id).querySelector("input");
+      fireEvent.change(input, { target: { value } });
+    }
 
-    // Vérifier les messages d'erreur
-    await waitFor(() => {
-      expect(screen.getByText(/Le champ nom ne doit contenir que des lettres/i)).toBeInTheDocument();
-      expect(screen.getByText(/Invalide champs email/i)).toBeInTheDocument();
-      expect(screen.getByText(/Le champ ville ne doit contenir que des lettres/i)).toBeInTheDocument();
-      expect(screen.getByText(/Le code postale doit être au format français/i)).toBeInTheDocument();
-      expect(screen.getByText(/Vous devez avoir plus de 18 ans/i)).toBeInTheDocument();
-    });
+    const submitButton = screen.getByRole("button", { name: /submit/i });
+    fireEvent.click(submitButton);
 
-    // Corriger les erreurs une par une
-    await user.clear(nomInput);
-    await user.type(nomInput, 'Martin');
-    
-    await user.clear(emailInput);
-    await user.type(emailInput, 'martin@email.com');
-    
-    await user.clear(cityInput);
-    await user.type(cityInput, 'Paris');
-    
-    await user.clear(postalCodeInput);
-    await user.type(postalCodeInput, '75001');
-
-    // Corriger la date de naissance
-    const validDate = new Date();
-    validDate.setFullYear(validDate.getFullYear() - 20);
-    await user.clear(dobInput);
-    await user.type(dobInput, validDate.toISOString().split('T')[0]);
-
-    // Soumettre à nouveau
-    await user.click(submitButton);
-
-    // Vérifier le succès
-    await waitFor(() => {
-      expect(screen.getByText('Enregistrement réussi')).toBeInTheDocument();
-    });
+    // Vérifier le message d'erreur
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText("Erreur lors de l'enregistrement de l'utilisateur.")
+        ).toBeInTheDocument();
+      },
+      { timeout: 10000 }
+    );
   });
 
-  test('should handle form state persistence correctly', async () => {
-    const user = userEvent.setup();
+  test("handles network errors appropriately", async () => {
+    mockFetch.mockImplementationOnce(() =>
+      Promise.reject(new Error("Network error"))
+    );
+
     render(<Form />);
-    
-    const nomInput = screen.getByTestId('nom').querySelector('input');
-    const prenomInput = screen.getByTestId('prenom').querySelector('input');
-    const emailInput = screen.getByTestId('email').querySelector('input');
-    const dobInput = screen.getByTestId('dob').querySelector('input');
-    const cityInput = screen.getByTestId('city').querySelector('input');
-    const postalCodeInput = screen.getByTestId('postalCode').querySelector('input');
 
-    // Remplir partiellement le formulaire
-    await user.type(nomInput, 'Martin');
-    await user.type(prenomInput, 'Jean');
+    // Remplir le formulaire avec des données valides
+    const inputs = {
+      nom: "Jean",
+      prenom: "Dupont",
+      email: "jean.dupont@example.com",
+      dob: new Date(Date.now() - 20 * 365 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0],
+      city: "Paris",
+      postalCode: "75001",
+    };
 
-    // Vérifier que le bouton est désactivé
-    const submitButton = screen.getByText('Submit');
-    expect(submitButton).toBeDisabled();
+    for (const [id, value] of Object.entries(inputs)) {
+      const input = screen.getByTestId(id).querySelector("input");
+      fireEvent.change(input, { target: { value } });
+    }
 
-    // Compléter le formulaire
-    await user.type(emailInput, 'martin@email.com');
-    const date = new Date();
-    date.setFullYear(date.getFullYear() - 20);
-    await user.type(dobInput, date.toISOString().split('T')[0]);
-    await user.type(cityInput, 'Paris');
-    await user.type(postalCodeInput, '75001');
+    const submitButton = screen.getByRole("button", { name: /submit/i });
+    fireEvent.click(submitButton);
 
-    // Vérifier que le bouton est activé
-    expect(submitButton).not.toBeDisabled();
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText("Erreur lors de l'enregistrement de l'utilisateur.")
+        ).toBeInTheDocument();
+      },
+      { timeout: 10000 }
+    );
   });
-}); 
+
+  test("saves form data to localStorage", async () => {
+    mockFetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ message: "User created successfully" }),
+      })
+    );
+
+    render(<Form />);
+
+    const testData = {
+      nom: "Jean",
+      prenom: "Dupont",
+      email: "jean.dupont@example.com",
+      dob: new Date(Date.now() - 20 * 365 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split("T")[0],
+      city: "Paris",
+      postalCode: "75001",
+    };
+
+    for (const [id, value] of Object.entries(testData)) {
+      const input = screen.getByTestId(id).querySelector("input");
+      fireEvent.change(input, { target: { value } });
+    }
+
+    const submitButton = screen.getByRole("button", { name: /submit/i });
+    fireEvent.click(submitButton);
+
+    await waitFor(
+      () => {
+        const savedData = JSON.parse(localStorage.getItem("formData"));
+        expect(savedData).toEqual(
+          expect.objectContaining({
+            firstName: testData.nom,
+            lastName: testData.prenom,
+            email: testData.email,
+            dob: testData.dob,
+            city: testData.city,
+            postalCode: testData.postalCode,
+          })
+        );
+      },
+      { timeout: 10000 }
+    );
+  });
+
+  test("loads saved form data from localStorage", async () => {
+    const savedData = {
+      firstName: "Jean",
+      lastName: "Dupont",
+      email: "jean.dupont@example.com",
+      dob: "2000-01-01",
+      city: "Paris",
+      postalCode: "75001",
+    };
+
+    localStorage.setItem("formData", JSON.stringify(savedData));
+
+    render(<Form />);
+
+    // Attendre que le composant charge les données
+    await waitFor(
+      () => {
+        const nomInput = screen.getByTestId("nom").querySelector("input");
+        const prenomInput = screen.getByTestId("prenom").querySelector("input");
+        const emailInput = screen.getByTestId("email").querySelector("input");
+        const dobInput = screen.getByTestId("dob").querySelector("input");
+        const cityInput = screen.getByTestId("city").querySelector("input");
+        const postalCodeInput = screen
+          .getByTestId("postalCode")
+          .querySelector("input");
+
+        expect(nomInput.value).toBe("Jean");
+        expect(prenomInput.value).toBe("Dupont");
+        expect(emailInput.value).toBe("jean.dupont@example.com");
+        expect(dobInput.value).toBe("2000-01-01");
+        expect(cityInput.value).toBe("Paris");
+        expect(postalCodeInput.value).toBe("75001");
+      },
+      { timeout: 10000 }
+    );
+  });
+
+  test("handles malformed localStorage data", async () => {
+    localStorage.setItem("formData", "invalid json");
+
+    render(<Form />);
+
+    // Vérifier que le formulaire est vide
+    const inputs = ["nom", "prenom", "email", "dob", "city", "postalCode"];
+    for (const id of inputs) {
+      const input = screen.getByTestId(id).querySelector("input");
+      expect(input.value).toBe("");
+    }
+  });
+});

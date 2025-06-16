@@ -1,0 +1,23 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build the stack
+        run: docker-compose -f docker-compose-v3.yml up -d
+
+      - name: Run e2e tests with cypress
+        uses: cypress-io/github-action@v6
+
+      - name: Stop the stack
+        run: docker-compose -f docker-compose-v3.yml down
