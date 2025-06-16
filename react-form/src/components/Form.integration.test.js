@@ -36,10 +36,25 @@ Object.defineProperty(window, "localStorage", { value: localStorageMock });
 jest.setTimeout(15000);
 
 describe("Form Integration Tests", () => {
+  let originalConsoleError;
+  let originalConsoleLog;
+
   beforeEach(() => {
     mockFetch.mockClear();
     localStorage.clear();
     jest.clearAllMocks();
+    // Sauvegarder les fonctions originales de console
+    originalConsoleError = console.error;
+    originalConsoleLog = console.log;
+    // Supprimer les logs pendant les tests
+    console.error = jest.fn();
+    console.log = jest.fn();
+  });
+
+  afterEach(() => {
+    // Restaurer les fonctions originales de console
+    console.error = originalConsoleError;
+    console.log = originalConsoleLog;
   });
 
   test("successfully submits form and shows success message", async () => {
@@ -241,7 +256,7 @@ describe("Form Integration Tests", () => {
     );
   });*/
 
- /* test("loads saved form data from localStorage", async () => {
+  /* test("loads saved form data from localStorage", async () => {
     const savedData = {
       firstName: "Jean",
       lastName: "Dupont",
