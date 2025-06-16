@@ -25,19 +25,15 @@ jobs:
       - name: Build the stack
         run: docker compose up -d
 
-      - name: Run e2e tests with cypress
-        uses: cypress-io/github-action@v6
-        with:
-          working-directory: react-form
-          install-command: npm ci
-          start: npm start
-          wait-on: "http://localhost:3000"
-          config: baseUrl=http://localhost:3000
-          spec: cypress/e2e/spec.cy.js
-          browser: chrome
-          record: false
-          config-file: cypress.config.js
-          build: npm run build
+      - name: Install dependencies
+        working-directory: react-form
+        run: npm ci
+
+      - name: Run Cypress tests
+        working-directory: react-form
+        run: |
+          npm run build
+          npm run cypress:run
 
       - name: Stop the stack
         if: always()
