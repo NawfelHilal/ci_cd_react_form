@@ -25,15 +25,22 @@ jobs:
       - name: Build the stack
         run: docker compose up -d
 
+      - name: Debug directory structure
+        run: |
+          pwd
+          ls -la
+          ls -la react-form
+
       - name: Install dependencies
-        working-directory: react-form
-        run: npm ci
+        run: |
+          cd react-form
+          npm install --legacy-peer-deps
 
       - name: Run Cypress tests
-        working-directory: react-form
         run: |
+          cd react-form
           npm run build
-          npm run cypress:run
+          npx cypress run
 
       - name: Stop the stack
         if: always()
