@@ -43,6 +43,16 @@ jobs:
           npm run build
           npm test -- --watchAll=false
 
+      - name: Build the stack
+        run: docker-compose -f docker-compose.yml up -d
+      - name: Run e2e tests with cypress
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: react-form/cypress
+          install: false
+      - name: Stop the stack
+        run: docker-compose -f docker-compose-v3.yml down
+
       - name: Generate JSDoc
         run: |
           cd react-form
