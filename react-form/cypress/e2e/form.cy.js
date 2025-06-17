@@ -34,18 +34,40 @@ describe("Form E2E Tests", () => {
     // Soumettre le formulaire
     cy.get('button[type="submit"]').click();
 
-    // Vérifier les messages d'erreur avec les textes exacts
-    cy.contains(
-      "Le champ nom ne doit contenir que des lettres et des accents."
-    ).should("be.visible");
-    cy.contains("Invalide champs email.").should("be.visible");
-    cy.contains("Vous devez avoir plus de 18 ans.").should("be.visible");
-    cy.contains(
-      "Le champ ville ne doit contenir que des lettres et des accents."
-    ).should("be.visible");
-    cy.contains("Le code postale doit être au format français.").should(
-      "be.visible"
+    // Attendre que le formulaire soit soumis et que les messages d'erreur apparaissent
+    cy.get('[data-testid="nom"]').should("have.attr", "aria-invalid", "true");
+    cy.get('[data-testid="email"]').should("have.attr", "aria-invalid", "true");
+    cy.get('[data-testid="dob"]').should("have.attr", "aria-invalid", "true");
+    cy.get('[data-testid="city"]').should("have.attr", "aria-invalid", "true");
+    cy.get('[data-testid="postalCode"]').should(
+      "have.attr",
+      "aria-invalid",
+      "true"
     );
+
+    // Vérifier les messages d'erreur avec les textes exacts
+    cy.get('[data-testid="nom"]')
+      .parent()
+      .contains("Le champ nom ne doit contenir que des lettres et des accents.")
+      .should("be.visible");
+    cy.get('[data-testid="email"]')
+      .parent()
+      .contains("Invalide champs email.")
+      .should("be.visible");
+    cy.get('[data-testid="dob"]')
+      .parent()
+      .contains("Vous devez avoir plus de 18 ans.")
+      .should("be.visible");
+    cy.get('[data-testid="city"]')
+      .parent()
+      .contains(
+        "Le champ ville ne doit contenir que des lettres et des accents."
+      )
+      .should("be.visible");
+    cy.get('[data-testid="postalCode"]')
+      .parent()
+      .contains("Le code postale doit être au format français.")
+      .should("be.visible");
   });
 
   it("should handle network errors gracefully", () => {
