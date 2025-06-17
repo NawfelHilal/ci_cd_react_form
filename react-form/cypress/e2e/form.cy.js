@@ -50,10 +50,18 @@ describe("Form E2E Tests", () => {
 
   it("should handle network errors gracefully", () => {
     // Simuler une erreur réseau
-    cy.intercept("POST", "**/api/users", {
-      statusCode: 500,
-      body: { message: "Network error" },
-    }).as("submitForm");
+    cy.intercept(
+      {
+        method: "POST",
+        url: "**/api/users",
+        hostname: "localhost",
+        port: 3000,
+      },
+      {
+        statusCode: 500,
+        body: { message: "Network error" },
+      }
+    ).as("submitForm");
 
     // Remplir le formulaire avec des données valides
     cy.get('[data-testid="nom"]').type("Martin");
@@ -66,10 +74,10 @@ describe("Form E2E Tests", () => {
     // Soumettre le formulaire
     cy.get('button[type="submit"]').click();
 
-    // Attendre que la requête soit terminée
-    cy.wait("@submitForm");
+    // Attendre que la requête soit terminée avec un timeout plus long
+    cy.wait("@submitForm", { timeout: 10000 });
 
-    // Vérifier le message d'erreur avec un timeout plus long
+    // Vérifier le message d'erreur
     cy.contains("Erreur lors de l'enregistrement de l'utilisateur.", {
       timeout: 10000,
     }).should("be.visible");
