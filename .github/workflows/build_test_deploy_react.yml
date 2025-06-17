@@ -44,7 +44,7 @@ jobs:
           npm test -- --watchAll=false
 
       - name: Build the stack
-        run: docker-compose -f docker-compose.yml up -d
+        run: docker compose up -d
       - name: Run e2e tests with cypress
         uses: cypress-io/github-action@v6
         with:
