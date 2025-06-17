@@ -15,5 +15,10 @@
             "src": "/(.*)",
             "dest": "server.py"
         }
-    ]
+    ],
+    "git": {
+        "deploymentEnabled": {
+            "main": false
+        }
+    }
 }
