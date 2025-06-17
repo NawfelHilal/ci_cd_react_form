@@ -38,6 +38,10 @@ def get_db_connection():
     )
 
 
+@app.get("/")
+async def hello_world():
+    return {"message": "Hello World"}
+
 @app.get("/users")
 async def get_users():
     try:

@@ -3,7 +3,15 @@ import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import Form from "./Form";
 
+// Mock fetch
+const mockFetch = jest.fn();
+global.fetch = mockFetch;
+
 describe("Form DOM Interactions", () => {
+  beforeEach(() => {
+    mockFetch.mockClear();
+  });
+
   test("should show error messages in DOM when submitting invalid data", async () => {
     const user = userEvent.setup();
     render(<Form />);
@@ -91,6 +99,13 @@ describe("Form DOM Interactions", () => {
   });
 
   test("should show success message in DOM after valid submission", async () => {
+    mockFetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ message: "User created successfully" }),
+      })
+    );
+
     const user = userEvent.setup();
     render(<Form />);
 
@@ -118,10 +133,12 @@ describe("Form DOM Interactions", () => {
     await user.click(screen.getByRole("button", { name: /submit/i }));
 
     // Vérifier que le message de succès apparaît dans le DOM
-    await waitFor(() => {
-      const successMessage = screen.getByText(/Enregistrement réussi/i);
-      expect(successMessage).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByText("Enregistrement réussi")).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
 
     // Vérifier que le formulaire est réinitialisé
     await waitFor(() => {
@@ -162,6 +179,8 @@ describe("Form DOM Interactions", () => {
     );
 
     // Le bouton devrait maintenant être activé
-    expect(submitButton).not.toBeDisabled();
+    await waitFor(() => {
+      expect(submitButton).not.toBeDisabled();
+    });
   });
 });

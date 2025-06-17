@@ -1,0 +1,24 @@
+{
+    "builds": [
+        {
+            "src": "server.py",
+            "use": "@vercel/python",
+            "config": {
+                "includeFiles" : [
+                    "dist/**"
+                ]
+            }
+        }
+    ],
+    "routes": [
+        {
+            "src": "/(.*)",
+            "dest": "server.py"
+        }
+    ],
+    "git": {
+        "deploymentEnabled": {
+            "main": false
+        }
+    }
+}

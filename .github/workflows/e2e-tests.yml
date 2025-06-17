@@ -36,15 +36,13 @@ jobs:
       - name: Install dependencies
         run: |
           cd react-form
-          rm -rf node_modules package-lock.json
-          npm cache clean --force
-          npm install --no-package-lock
+          npm ci
 
-      - name: Run Cypress tests
-        run: |
-          cd react-form
-          npm run build
-          npx cypress run
+      - name: Run e2e tests
+        uses: cypress-io/github-action@v6
+        with:
+          # Cypress tests and config file are in "e2e" folder
+          working-directory: react-form
 
       - name: Stop the stack
         if: always()

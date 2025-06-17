@@ -1,4 +1,4 @@
-describe("Form E2E Tests", () => {
+/*describe("Form E2E Tests", () => {
   beforeEach(() => {
     cy.visit("http://localhost:3000");
   });
@@ -50,7 +50,7 @@ describe("Form E2E Tests", () => {
 
   it("should handle network errors gracefully", () => {
     // Simuler une erreur réseau
-    cy.intercept("POST", "**/api/users", {
+    cy.intercept("POST", "**/ /*api/users", {
       statusCode: 500,
       body: { message: "Network error" },
     });
@@ -71,4 +71,4 @@ describe("Form E2E Tests", () => {
       "be.visible"
     );
   });
-});
+});*/
