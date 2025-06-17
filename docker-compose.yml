@@ -1,43 +1,6 @@
 version: '3'
 
 services:
-  db:
-    image: mysql:9.3
-    volumes:
-      - ./sqlfiles/:/docker-entrypoint-initdb.d/
-    restart: always
-    environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 8081:8080
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
-    depends_on:
-      - db
-
-  api:
-    build: 
-      context: ./react-form/server
-      dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
-    environment:
-      - MYSQL_HOST=db
-      - MYSQL_USER=root
-      - MYSQL_ROOT_PASSWORD=ynovpwd
-      - MYSQL_DATABASE=ynov_ci
-    restart: always
-    depends_on:
-      - db
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000"]
-
   frontend:
     build:
       context: ./react-form
@@ -45,12 +8,10 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - REACT_APP_API_URL=http://localhost:8000
+      REACT_APP_API_URL: https://votre-api-vercel.vercel.app
     volumes:
       - ./react-form:/app
       - /app/node_modules
-    depends_on:
-      - api
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000"]
     command: npm start
