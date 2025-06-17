@@ -1,5 +1,9 @@
 name: Build, Test and Deploy React Application
 
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
 # Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
@@ -48,7 +52,7 @@ jobs:
       - name: Run e2e tests with cypress
         uses: cypress-io/github-action@v6
         with:
-          working-directory: react-form/cypress
+          working-directory: react-form
           install: false
       - name: Stop the stack
         run: docker-compose -f docker-compose-v3.yml down
@@ -126,3 +130,16 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  deploy_vercel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy to prod
+        run: vercel --prod --token=${{ secrets.VERCEL_TOKEN }}
