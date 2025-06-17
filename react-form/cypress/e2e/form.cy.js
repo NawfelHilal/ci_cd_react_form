@@ -34,16 +34,16 @@ describe("Form E2E Tests", () => {
     // Soumettre le formulaire
     cy.get('button[type="submit"]').click();
 
-    // Vérifier les messages d'erreur
-    cy.contains("Le champ nom ne doit contenir que des lettres").should(
-      "be.visible"
-    );
-    cy.contains("Invalide champs email").should("be.visible");
-    cy.contains("Vous devez avoir plus de 18 ans").should("be.visible");
-    cy.contains("Le champ ville ne doit contenir que des lettres").should(
-      "be.visible"
-    );
-    cy.contains("Le code postale doit être au format français").should(
+    // Vérifier les messages d'erreur avec les textes exacts
+    cy.contains(
+      "Le champ nom ne doit contenir que des lettres et des accents."
+    ).should("be.visible");
+    cy.contains("Invalide champs email.").should("be.visible");
+    cy.contains("Vous devez avoir plus de 18 ans.").should("be.visible");
+    cy.contains(
+      "Le champ ville ne doit contenir que des lettres et des accents."
+    ).should("be.visible");
+    cy.contains("Le code postale doit être au format français.").should(
       "be.visible"
     );
   });
