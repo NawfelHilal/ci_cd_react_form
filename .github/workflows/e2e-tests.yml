@@ -16,6 +16,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
+          cache-dependency-path: react-form/package-lock.json
           node-version: "16"
           cache: "npm"
 
