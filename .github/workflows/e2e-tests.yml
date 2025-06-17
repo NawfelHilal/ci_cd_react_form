@@ -10,15 +10,19 @@ jobs:
   e2e-tests:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [18.x]
+
     steps:
       - uses: actions/checkout@v3
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          cache-dependency-path: react-form/package-lock.json
-          node-version: "16"
+          node-version: ${{ matrix.node-version }}
           cache: "npm"
+          cache-dependency-path: react-form/package-lock.json
 
       - name: Debug Node.js and npm
         run: |
