@@ -42,6 +42,7 @@ def get_db_connection():
 async def hello_world():
     return {"message": "Hello World"}
 
+
 @app.get("/users")
 async def get_users():
     try:
@@ -86,3 +87,25 @@ async def create_user(user: User):
     except Exception as e:
         print("Database error:", str(e))
         return {"error": str(e)}
+
+
+class UserReduced(BaseModel):
+    firstName: str
+    lastName: str
+    email: str
+
+
+@app.get("/users", response_model=list[UserReduced])
+def get_users():
+    conn = mysql.connector.connect(
+        host="db",  # ou selon ta config
+        user="root",
+        password="root",
+        database="your_db",
+    )
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT firstName, lastName, email FROM users")
+    users = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return users

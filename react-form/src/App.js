@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
 import Form from "./components/Form";
+import UserList from "./components/UserList";
 
 function App() {
   const [usersCount, setUsersCount] = useState(0);
@@ -40,6 +41,7 @@ function App() {
       <Form />
       <p>Nombre d'utilisateurs : {usersCount}</p>
       {error && <p style={{ color: "red" }}>Erreur : {error}</p>}
+      <UserList />
     </div>
   );
 }

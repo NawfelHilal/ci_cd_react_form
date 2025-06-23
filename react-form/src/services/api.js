@@ -1,7 +1,5 @@
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
-
-
 export const userService = {
   // Récupérer tous les utilisateurs
   getAllUsers: async () => {
@@ -38,5 +36,11 @@ export const userService = {
       console.error("Error creating user:", error);
       throw error;
     }
+  },
+  async getUsers() {
+    const response = await fetch("http://localhost:8000/users");
+    if (!response.ok)
+      throw new Error("Erreur lors de la récupération des utilisateurs");
+    return response.json();
   },
 };
