@@ -60,7 +60,7 @@ jobs:
           wait-on: "http://localhost:3000"
           install: false
       - name: Stop the stack
-        run: docker compose -f docker-compose-v3.yml down
+        run: docker compose -f docker-compose.yml down
 
       - name: Generate JSDoc
         run: |
