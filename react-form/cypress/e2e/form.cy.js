@@ -1,6 +1,6 @@
 describe("Form E2E Tests", () => {
   beforeEach(() => {
-    cy.visit("https://ci-cd-react-form.vercel.app/");
+    cy.visit("http://localhost:3000");
   });
 
   it("should submit form successfully with valid data", () => {

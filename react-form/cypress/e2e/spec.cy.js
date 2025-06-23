@@ -1,6 +1,6 @@
 describe("Home page spec", () => {
   it("deployed react app to localhost", () => {
-    cy.visit("https://ci-cd-react-form.vercel.app/");
+    cy.visit("http://localhost:3000");
     cy.wait(3000);
     cy.contains("Nombre d'utilisateurs : 2");
   });
