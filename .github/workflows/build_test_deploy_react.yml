@@ -53,6 +53,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           working-directory: react-form
+          wait-on: http://localhost:3000
           install: false
       - name: Stop the stack
         run: docker-compose -f docker-compose-v3.yml down
