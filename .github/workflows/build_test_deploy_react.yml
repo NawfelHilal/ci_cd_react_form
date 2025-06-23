@@ -46,14 +46,18 @@ jobs:
           cd react-form
           npm run build
           npm test -- --watchAll=false
+        env:
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
 
       - name: Build the stack
-        run: docker compose up -d
+        run: |
+          docker compose up -d
+          docker ps -a
       - name: Run e2e tests with cypress
         uses: cypress-io/github-action@v6
         with:
           working-directory: react-form
-          wait-on: "http://localhost:3000,https://ci-cd-react-form.vercel.app/"
+          wait-on: "http://localhost:3000"
           install: false
       - name: Stop the stack
         run: docker-compose -f docker-compose-v3.yml down
