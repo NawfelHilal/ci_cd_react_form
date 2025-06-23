@@ -21,7 +21,7 @@ describe("App Component", () => {
     mockFetch.mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({ users: [{}, {}, {}] }),
+        json: () => Promise.resolve([{}, {}, {}]),
       })
     );
 
@@ -63,7 +63,7 @@ describe("App Component", () => {
     mockFetch.mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({ users: [] }),
+        json: () => Promise.resolve([]),
       })
     );
 

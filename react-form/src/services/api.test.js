@@ -10,7 +10,7 @@ describe("API Service Tests", () => {
     jest.clearAllMocks();
   });
 
-  describe("getAllUsers", () => {
+  describe("getUsers", () => {
     test("successfully fetches all users", async () => {
       const mockUsers = [
         { id: 1, firstName: "John", lastName: "Doe" },
@@ -20,11 +20,11 @@ describe("API Service Tests", () => {
       mockFetch.mockImplementationOnce(() =>
         Promise.resolve({
           ok: true,
-          json: () => Promise.resolve({ users: mockUsers }),
+          json: () => Promise.resolve(mockUsers),
         })
       );
 
-      const result = await userService.getAllUsers();
+      const result = await userService.getUsers();
       expect(result).toEqual(mockUsers);
       expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining("/users"));
     });
@@ -33,7 +33,7 @@ describe("API Service Tests", () => {
       const error = new Error("Network error");
       mockFetch.mockImplementationOnce(() => Promise.reject(error));
 
-      await expect(userService.getAllUsers()).rejects.toThrow("Network error");
+      await expect(userService.getUsers()).rejects.toThrow("Network error");
       expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining("/users"));
     });
   });
