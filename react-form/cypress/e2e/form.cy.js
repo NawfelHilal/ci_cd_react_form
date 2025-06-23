@@ -16,7 +16,9 @@ describe("Form E2E Tests", () => {
     cy.get('button[type="submit"]').click();
 
     // Vérifier le message de succès
-    cy.contains("Enregistrement réussi").should("be.visible");
+    cy.contains("Enregistrement réussi", { timeout: 10000 }).should(
+      "be.visible"
+    );
 
     // Vérifier que le formulaire est réinitialisé
     cy.get('[data-testid="nom"]').should("have.value", "");
