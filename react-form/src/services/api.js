@@ -1,4 +1,4 @@
-const API_URL = "https://ci-cd-react-form.vercel.app/";
+const API_URL = process.env.REACT_APP_API_URL;
 
 export const userService = {
   // Récupérer tous les utilisateurs
