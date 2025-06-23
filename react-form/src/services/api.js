@@ -1,12 +1,14 @@
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 export const userService = {
   // Récupérer tous les utilisateurs
-  getAllUsers: async () => {
+  async getUsers() {
     try {
       const response = await fetch(`${API_URL}/users`);
-      const data = await response.json();
-      return data.users;
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération des utilisateurs");
+      }
+      return response.json(); // L'API retourne directement un tableau
     } catch (error) {
       console.error("Error fetching users:", error);
       throw error;
@@ -14,7 +16,7 @@ export const userService = {
   },
 
   // Créer un nouvel utilisateur
-  createUser: async (userData) => {
+  async createUser(userData) {
     try {
       const response = await fetch(`${API_URL}/users`, {
         method: "POST",
@@ -36,11 +38,5 @@ export const userService = {
       console.error("Error creating user:", error);
       throw error;
     }
-  },
-  async getUsers() {
-    const response = await fetch("http://localhost:8000/users");
-    if (!response.ok)
-      throw new Error("Erreur lors de la récupération des utilisateurs");
-    return response.json();
   },
 };

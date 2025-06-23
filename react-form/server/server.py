@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import date
+from typing import List
 
 
 # Modèle de données pour l'utilisateur
@@ -14,12 +15,6 @@ class User(BaseModel):
     dob: date
     city: str
     postalCode: str
-
-
-class UserReduced(BaseModel):
-    firstName: str
-    lastName: str
-    email: str
 
 
 app = FastAPI()
@@ -47,21 +42,6 @@ def get_db_connection():
 @app.get("/")
 async def hello_world():
     return {"message": "Hello World"}
-
-
-@app.get("/users", response_model=list[UserReduced])
-async def get_users():
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT firstName, lastName, email FROM users")
-        users = cursor.fetchall()
-        cursor.close()
-        conn.close()
-        return users
-    except Exception as e:
-        print("Database error:", str(e))
-        return []
 
 
 @app.post("/users")
@@ -92,3 +72,20 @@ async def create_user(user: User):
     except Exception as e:
         print("Database error:", str(e))
         return {"error": str(e)}
+
+
+class UserReduced(BaseModel):
+    firstName: str
+    lastName: str
+    email: str
+
+
+@app.get("/users", response_model=List[UserReduced])
+def get_users():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT firstName, lastName, email FROM users")
+    users = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return users

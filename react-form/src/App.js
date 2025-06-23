@@ -13,8 +13,9 @@ const App = () => {
     userService
       .getUsers()
       .then((data) => {
-        setUsers(data.users);
-        setUserCount(data.users.length);
+        setUsers(data);
+        setUserCount(data.length);
+        setError(null);
       })
       .catch(() => {
         setUsers([]);
@@ -34,7 +35,7 @@ const App = () => {
       <p>Nombre d'utilisateurs : {userCount}</p>
       <Form onUserAdded={handleUserAdded} />
       {error && <p style={{ color: "red" }}>Erreur : {error}</p>}
-      <UserList users={users || []} />
+      <UserList users={users} />
     </div>
   );
 };
