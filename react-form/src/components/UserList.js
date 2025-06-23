@@ -1,19 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { userService } from "../services/api";
+import React from "react";
 
-const UserList = () => {
-  const [users, setUsers] = useState([]);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    userService
-      .getUsers()
-      .then((data) => setUsers(data.users))
-      .catch(() => setError("Erreur lors du chargement des utilisateurs"));
-  }, []);
-
-  if (error) return <div>{error}</div>;
-
+const UserList = ({ users }) => {
+  if (!Array.isArray(users)) {
+    return (
+      <div>
+        <h2>Liste des utilisateurs</h2>
+        <ul></ul>
+      </div>
+    );
+  }
   return (
     <div>
       <h2>Liste des utilisateurs</h2>

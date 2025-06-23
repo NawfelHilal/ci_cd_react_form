@@ -33,7 +33,7 @@ import { userService } from "../services/api";
  * // - Ville
  * // - Code postal
  */
-const Form = () => {
+const Form = (props) => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -271,6 +271,9 @@ const Form = () => {
       // Appel au service API pour créer l'utilisateur
       await userService.createUser(formData);
       setOpenSuccess(true);
+      if (props.onUserAdded) {
+        props.onUserAdded(formData);
+      }
       resetForm();
       // Supprimer les données du localStorage après une soumission réussie
       localStorage.removeItem("formData");

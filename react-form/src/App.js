@@ -2,48 +2,41 @@ import React, { useState, useEffect } from "react";
 import "./App.css";
 import Form from "./components/Form";
 import UserList from "./components/UserList";
+import { userService } from "./services/api";
 
-function App() {
-  const [usersCount, setUsersCount] = useState(0);
+const App = () => {
+  const [users, setUsers] = useState([]);
+  const [userCount, setUserCount] = useState(0);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    let isMounted = true;
+    userService
+      .getUsers()
+      .then((data) => {
+        setUsers(data.users);
+        setUserCount(data.users.length);
+      })
+      .catch(() => {
+        setUsers([]);
+        setUserCount(0);
+        setError("Erreur lors du chargement des utilisateurs");
+      });
+  }, []);
 
-    async function countUsers() {
-      try {
-        const response = await fetch("http://localhost:8000/users");
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        if (isMounted) {
-          setUsersCount(data.users.length);
-          console.log("data:", data);
-        }
-      } catch (error) {
-        if (isMounted) {
-          console.error("Error fetching users:", error);
-          setError(error.message);
-        }
-      }
-    }
-
-    countUsers();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []); // On garde une dépendance vide car l'URL est fixe
+  const handleUserAdded = (newUser) => {
+    setUsers((prev) => [...prev, newUser]);
+    setUserCount((prev) => prev + 1);
+  };
 
   return (
     <div className="App">
-      <Form />
-      <p>Nombre d'utilisateurs : {usersCount}</p>
+      <h1>Utilisateurs ({userCount})</h1>
+      <p>Nombre d'utilisateurs : {userCount}</p>
+      <Form onUserAdded={handleUserAdded} />
       {error && <p style={{ color: "red" }}>Erreur : {error}</p>}
-      <UserList />
+      <UserList users={users || []} />
     </div>
   );
-}
+};
 
 export default App;
