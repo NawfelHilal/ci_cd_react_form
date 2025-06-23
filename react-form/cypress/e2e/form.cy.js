@@ -54,7 +54,7 @@ describe("Form E2E Tests", () => {
     cy.get('[data-testid="postalCode"] input').type("06000");
     cy.get('button[type="submit"]').click();
 
-    cy.contains(/Invalide champs email/i).should("be.visible");
+    cy.contains("Invalide champs email.").should("be.visible");
   });
 
   it("affiche une erreur si le backend est indisponible", () => {
