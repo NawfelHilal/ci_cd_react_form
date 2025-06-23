@@ -327,7 +327,7 @@ const Form = (props) => {
   return (
     <div>
       <Typography variant="h4">Form</Typography>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <Grid container spacing={2}>
           <Grid item xs={4}>
             <TextField
@@ -356,7 +356,7 @@ const Form = (props) => {
           <Grid item xs={4}>
             <TextField
               label="Email"
-              type="email"
+              type="text"
               data-testid="email"
               value={email}
               onChange={handleEmailChange}
