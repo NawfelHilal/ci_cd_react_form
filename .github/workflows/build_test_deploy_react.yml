@@ -25,7 +25,7 @@ jobs:
         node-version: [20.x]
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # Checks-outs your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       - name: Use Node.js ${{ matrix.node-version }}
@@ -53,9 +53,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           working-directory: react-form
-          wait-on: |
-            http://localhost:3000
-            http://localhost:8000
+          wait-on: "http://localhost:3000,http://localhost:8000"
           install: false
       - name: Stop the stack
         run: docker-compose -f docker-compose-v3.yml down
