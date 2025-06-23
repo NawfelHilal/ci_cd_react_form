@@ -16,6 +16,12 @@ class User(BaseModel):
     postalCode: str
 
 
+class UserReduced(BaseModel):
+    firstName: str
+    lastName: str
+    email: str
+
+
 app = FastAPI()
 
 # Configuration CORS
@@ -41,6 +47,21 @@ def get_db_connection():
 @app.get("/")
 async def hello_world():
     return {"message": "Hello World"}
+
+
+@app.get("/users", response_model=list[UserReduced])
+async def get_users():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT firstName, lastName, email FROM users")
+        users = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return users
+    except Exception as e:
+        print("Database error:", str(e))
+        return []
 
 
 @app.post("/users")
@@ -71,25 +92,3 @@ async def create_user(user: User):
     except Exception as e:
         print("Database error:", str(e))
         return {"error": str(e)}
-
-
-class UserReduced(BaseModel):
-    firstName: str
-    lastName: str
-    email: str
-
-
-@app.get("/users", response_model=list[UserReduced])
-def get_users():
-    conn = mysql.connector.connect(
-        host="db",  # ou selon ta config
-        user="root",
-        password="root",
-        database="your_db",
-    )
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT firstName, lastName, email FROM users")
-    users = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return users
