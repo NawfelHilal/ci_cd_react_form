@@ -43,22 +43,6 @@ async def hello_world():
     return {"message": "Hello World"}
 
 
-@app.get("/users")
-async def get_users():
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM users")
-        users = cursor.fetchall()
-        print("Users from database:", users)
-        cursor.close()
-        conn.close()
-        return {"users": users}
-    except Exception as e:
-        print("Database error:", str(e))
-        return {"users": [], "error": str(e)}
-
-
 @app.post("/users")
 async def create_user(user: User):
     try:
