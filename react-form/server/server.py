@@ -46,6 +46,8 @@ async def hello_world():
 
 @app.post("/users")
 async def create_user(user: User):
+    conn = None
+    cursor = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -63,20 +65,21 @@ async def create_user(user: User):
         )
 
         cursor.execute(sql_insert_query, values)
-        conn.commit()  # Important : commit les changements
-
-        cursor.close()
-        conn.close()
-
+        conn.commit()
         return {"message": "User created successfully", "user": user.dict()}
     except mysql.connector.Error as e:
-        if e.errno == 1062:  # Duplicate entry
+        if e.errno == 1062:
             raise HTTPException(
                 status_code=409, detail="Un utilisateur avec cet email existe déjà."
             )
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 class UserReduced(BaseModel):
