@@ -33,6 +33,12 @@ export const userService = {
         }),
       });
       const data = await response.json();
+      if (!response.ok) {
+        // FastAPI renvoie l'erreur dans data.detail
+        throw new Error(
+          data.detail || "Erreur lors de la création de l'utilisateur"
+        );
+      }
       return data;
     } catch (error) {
       console.error("Error creating user:", error);

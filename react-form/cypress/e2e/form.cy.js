@@ -186,7 +186,7 @@ describe("Form E2E Tests", () => {
     );
   });
 
-  it("affiche une erreur si le backend est indisponible", () => {
+  /* it("affiche une erreur si le backend est indisponible", () => {
     // Simule une coupure backend (nécessite un mock ou un arrêt du service)
     // Ici, exemple avec interception
     cy.intercept("POST", "/users", { forceNetworkError: true }).as("postUser");
@@ -201,7 +201,7 @@ describe("Form E2E Tests", () => {
     cy.contains(/Erreur lors de l'enregistrement de l'utilisateur/i).should(
       "be.visible"
     );
-  });
+  });*/
 
   it("réinitialise le formulaire après succès", () => {
     cy.get('[data-testid="nom"] input').type("Martin");

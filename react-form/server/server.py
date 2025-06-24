@@ -1,6 +1,6 @@
 import mysql.connector
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import date
@@ -71,12 +71,12 @@ async def create_user(user: User):
         return {"message": "User created successfully", "user": user.dict()}
     except mysql.connector.Error as e:
         if e.errno == 1062:  # Duplicate entry
-            return {"error": "Un utilisateur avec cet email existe déjà."}
-        print("Database error:", str(e))
-        return {"error": str(e)}
+            raise HTTPException(
+                status_code=409, detail="Un utilisateur avec cet email existe déjà."
+            )
+        raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
-        print("Database error:", str(e))
-        return {"error": str(e)}
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 class UserReduced(BaseModel):

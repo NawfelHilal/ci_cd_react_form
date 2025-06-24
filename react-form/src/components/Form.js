@@ -269,7 +269,7 @@ const Form = (props) => {
       localStorage.setItem("formData", JSON.stringify(formData));
 
       // Appel au service API pour créer l'utilisateur
-      await userService.createUser(formData);
+      const response = await userService.createUser(formData);
       setOpenSuccess(true);
       if (props.onUserAdded) {
         props.onUserAdded(formData);
@@ -278,7 +278,9 @@ const Form = (props) => {
       // Supprimer les données du localStorage après une soumission réussie
       localStorage.removeItem("formData");
     } catch (error) {
-      setError("Erreur lors de l'enregistrement de l'utilisateur.");
+      setError(
+        error.message || "Erreur lors de l'enregistrement de l'utilisateur."
+      );
       setOpenError(true);
     }
   };
