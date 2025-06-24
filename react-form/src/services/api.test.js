@@ -36,6 +36,18 @@ describe("API Service Tests", () => {
       await expect(userService.getUsers()).rejects.toThrow("Network error");
       expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining("/users"));
     });
+
+    test("throws if response.ok is false", async () => {
+      mockFetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: false,
+          json: () => Promise.resolve({}),
+        })
+      );
+      await expect(userService.getUsers()).rejects.toThrow(
+        "Erreur lors de la récupération des utilisateurs"
+      );
+    });
   });
 
   describe("createUser", () => {
@@ -100,6 +112,30 @@ describe("API Service Tests", () => {
 
       const result = await userService.createUser(mockUserData);
       expect(result).toEqual({ invalid: "data" });
+    });
+
+    test("throws if response.ok is false and data.detail is present", async () => {
+      mockFetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: false,
+          json: () => Promise.resolve({ detail: "Erreur API" }),
+        })
+      );
+      await expect(userService.createUser(mockUserData)).rejects.toThrow(
+        "Erreur API"
+      );
+    });
+
+    test("throws if response.ok is false and data.detail is missing", async () => {
+      mockFetch.mockImplementationOnce(() =>
+        Promise.resolve({
+          ok: false,
+          json: () => Promise.resolve({}),
+        })
+      );
+      await expect(userService.createUser(mockUserData)).rejects.toThrow(
+        "Erreur lors de la création de l'utilisateur"
+      );
     });
   });
 });
