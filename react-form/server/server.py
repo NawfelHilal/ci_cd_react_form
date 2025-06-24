@@ -69,6 +69,11 @@ async def create_user(user: User):
         conn.close()
 
         return {"message": "User created successfully", "user": user.dict()}
+    except mysql.connector.Error as e:
+        if e.errno == 1062:  # Duplicate entry
+            return {"error": "Un utilisateur avec cet email existe déjà."}
+        print("Database error:", str(e))
+        return {"error": str(e)}
     except Exception as e:
         print("Database error:", str(e))
         return {"error": str(e)}
