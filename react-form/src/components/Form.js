@@ -269,7 +269,7 @@ const Form = (props) => {
       localStorage.setItem("formData", JSON.stringify(formData));
 
       // Appel au service API pour créer l'utilisateur
-      const response = await userService.createUser(formData);
+      await userService.createUser(formData);
       setOpenSuccess(true);
       if (props.onUserAdded) {
         props.onUserAdded(formData);
