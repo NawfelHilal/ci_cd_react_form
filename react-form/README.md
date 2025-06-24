@@ -1,59 +1,104 @@
-# Formulaire React avec CI/CD
+# Projet Individuel : Formulaire React Fullstack CI/CD
 
-Ce projet est un formulaire React avec validation côté client et intégration continue/déploiement continu (CI/CD). Il utilise GitHub Actions pour automatiser les tests, la couverture de code et le déploiement sur GitHub Pages.
+## Description du projet
 
-![Badge GitHub Actions](https://github.com/NawfelHilal/ci_cd_react_form/actions/workflows/build_test_deploy_react.yml/badge.svg)
-[![codecov](https://codecov.io/gh/NawfelHilal/ci_cd_react_form/branch/main/graph/badge.svg)](https://codecov.io/gh/NawfelHilal/ci_cd_react_form)
+Ce projet est une application fullstack permettant de gérer des utilisateurs via un formulaire React connecté à une base de données MySQL.  
+L'architecture repose sur Docker (MySQL, Adminer, API Python/FastAPI, Frontend React).  
+Les utilisateurs peuvent s'inscrire via le formulaire, la liste des utilisateurs (informations réduites) est affichée, et un compte admin permet de supprimer un utilisateur et de voir ses informations privées.
 
-## Caractéristiques
+La CI/CD est assurée par GitHub Actions :
 
-- Formulaire avec validation en temps réel et soumission sécurisée
-- Interface utilisateur élégante avec Material UI
-- Couverture de test à 100%
-- Documentation générée automatiquement avec JSDoc
-- Déploiement continu vers GitHub Pages
+- Tests unitaires et d'intégration avec rapport de couverture sur Codecov
+- Tests end-to-end Cypress
+- Déploiement automatique du front sur GitHub Pages et du back sur Vercel
+- La base de données de production est hébergée sur Alwaysdata
 
-## Démonstration
+---
 
-Vous pouvez voir l'application en action ici : [https://nawfelhilal.github.io/ci_cd_react_form/](https://nawfelhilal.github.io/ci_cd_react_form/)
+## Liens du projet
 
-## Validation du formulaire
+- **Repo GitHub** : [https://github.com/NawfelHilal/ci_cd_react_form](https://github.com/NawfelHilal/ci_cd_react_form)
+- **Démo Frontend (GitHub Pages)** : [https://nawfelhilal.github.io/ci_cd_react_form/](https://nawfelhilal.github.io/ci_cd_react_form/)
+- **Démo Backend (Vercel)** : [https://ci-cd-react-form-back.vercel.app/](https://ci-cd-react-form-back.vercel.app/) <!-- À adapter selon ton déploiement -->
+- **Rapport de couverture Codecov** : [https://codecov.io/gh/NawfelHilal/ci_cd_react_form](https://codecov.io/gh/NawfelHilal/ci_cd_react_form)
 
-Le formulaire implémente les validations suivantes :
+---
 
-- Champs Nom et Prénom : lettres, accents, espaces et tirets uniquement
-- Email : format email standard
-- Date de naissance : âge minimum de 18 ans
-- Ville : lettres, accents, espaces et tirets uniquement
-- Code postal : format français (5 chiffres)
+## Architecture Docker
 
-## Architecture de CI/CD
+L'architecture Docker comprend :
 
-Ce projet utilise GitHub Actions pour automatiser :
+- **MySQL** (base de données)
+- **Adminer** (interface d'administration de la BDD)
+- **API Python/FastAPI** (backend)
+- **React** (frontend)
 
-1. La construction de l'application
-2. L'exécution des tests unitaires
-3. La mesure de la couverture de code
-4. La génération de documentation
-5. Le déploiement sur GitHub Pages
+---
 
-Le workflow est déclenché à chaque push ou pull request sur la branche main.
+## Fonctionnalités principales
 
-Déploiement sur npm :
+- **Formulaire React** avec validation (nom, prénom, email, date de naissance, ville, code postal)
+- **Sauvegarde en base MySQL** (plus de localStorage)
+- **Affichage de la liste des utilisateurs** (infos réduites)
 
-Le déploiement sur npm est automatique lorsque la version est modifiée dans le fichier package.json.
-Toujours vérifier que la version n'existe pas déjà sur npm avant de publier.
+---
 
-## Installation et utilisation
+## CI/CD & Tests
 
-### Prérequis
+- **Tests unitaires et d'intégration** (Jest, React Testing Library)
+- **Tests end-to-end** (Cypress)
+- **Rapport de couverture** (Codecov)
+- **Pipeline GitHub Actions** :
+  - Lancement des tests unitaires et d'intégration
+  - Lancement des tests e2e Cypress (via Docker)
+  - Déploiement automatique du front (GitHub Pages) et du back (Vercel)
+  - Utilisation de la base de données de production sur Alwaysdata
 
-- Node.js 18+ et npm
+---
 
-### Installation
+## Déploiement
+
+- **Frontend** : GitHub Pages
+- **Backend** : Vercel
+- **BDD de production** : Alwaysdata
+
+---
+
+## Pour la notation
+
+- **Architecture Docker fonctionnelle (mysql / python / adminer / react)** : / 6 pts
+- **Tests unitaires et intégration + couverture Codecov** : / 6 pts
+- **Tests e2e Cypress** : / 6 pts
+- **Pipeline GitHub Actions (tests + déploiement front/back + BDD prod)** : / 2 pts
+
+---
+
+## Pour rendre le projet
+
+Fournir un fichier `.txt` contenant :
+
+- Le lien du repo GitHub
+- Le lien Vercel (backend)
+- Le lien GitHub Pages (frontend)
+- Le lien Codecov
+
+---
+
+## Installation locale
 
 ```bash
 git clone https://github.com/NawfelHilal/ci_cd_react_form.git
-cd ci_cd_react_form/react-form
 npm install
 ```
+
+- Frontend : http://localhost:3000
+- Backend : http://localhost:8000
+- Adminer : http://localhost:8081 (login avec root/ynovpwd)
+- MySQL : localhost:3306
+
+---
+
+## Contact
+
+Nawfel Hilal  
+[https://github.com/NawfelHilal](https://github.com/NawfelHilal)
