@@ -19,7 +19,7 @@ La CI/CD est assurée par GitHub Actions :
 
 - **Repo GitHub** : [https://github.com/NawfelHilal/ci_cd_react_form](https://github.com/NawfelHilal/ci_cd_react_form)
 - **Démo Frontend (GitHub Pages)** : [https://nawfelhilal.github.io/ci_cd_react_form/](https://nawfelhilal.github.io/ci_cd_react_form/)
-- **Démo Backend (Vercel)** : [https://ci-cd-react-form-back.vercel.app/](https://ci-cd-react-form-back.vercel.app/) <!-- À adapter selon ton déploiement -->
+- **Démo Backend (Vercel)** : [https://ci-cd-react-form.vercel.app/](https://ci-cd-react-form.vercel.app/) <!-- À adapter selon ton déploiement -->
 - **Rapport de couverture Codecov** : [https://codecov.io/gh/NawfelHilal/ci_cd_react_form](https://codecov.io/gh/NawfelHilal/ci_cd_react_form)
 
 ---
