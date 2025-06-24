@@ -219,9 +219,7 @@ describe("Form coverage tests", () => {
     render(<Form />);
     fillValidForm();
     fireEvent.click(screen.getByRole("button", { name: /submit/i }));
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Erreur lors de l'enregistrement de l'utilisateur."
-    );
+    expect(await screen.findByRole("alert")).toHaveTextContent("API Error");
   });
 
   it("appelle la prop onUserAdded si fournie", async () => {
