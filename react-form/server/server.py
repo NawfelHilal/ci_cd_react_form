@@ -6,7 +6,6 @@ from pydantic import BaseModel
 from datetime import date
 from typing import List
 
-
 # Modèle de données pour l'utilisateur
 class User(BaseModel):
     firstName: str
