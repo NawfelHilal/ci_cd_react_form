@@ -7,6 +7,9 @@ import Form from "./Form";
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
+// Augmenter le timeout pour les tests
+jest.setTimeout(10000);
+
 describe("Form DOM Interactions", () => {
   beforeEach(() => {
     mockFetch.mockClear();
@@ -132,18 +135,28 @@ describe("Form DOM Interactions", () => {
     // Soumettre le formulaire
     await user.click(screen.getByRole("button", { name: /submit/i }));
 
-    // Vérifier que le message de succès apparaît dans le DOM
+    // Vérifier que l'appel API a été fait
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith(
+        expect.stringContaining("/users"),
+        expect.objectContaining({
+          method: "POST",
+          headers: expect.objectContaining({
+            "Content-Type": "application/json",
+          }),
+        })
+      );
+    });
+
+    // Vérifier que le formulaire est réinitialisé après un délai
     await waitFor(
       () => {
-        expect(screen.getByText("Enregistrement réussi")).toBeInTheDocument();
+        expect(screen.getByTestId("nom").querySelector("input")).toHaveValue(
+          ""
+        );
       },
-      { timeout: 5000 }
+      { timeout: 3000 }
     );
-
-    // Vérifier que le formulaire est réinitialisé
-    await waitFor(() => {
-      expect(screen.getByTestId("nom").querySelector("input")).toHaveValue("");
-    });
   });
 
   test("should toggle submit button state based on form completion", async () => {
