@@ -4,6 +4,8 @@ import { userService } from "./api";
 global.fetch = jest.fn();
 
 describe("API Integration Tests", () => {
+  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+
   beforeEach(() => {
     // Reset all mocks before each test
     jest.clearAllMocks();
@@ -44,7 +46,7 @@ describe("API Integration Tests", () => {
       const result = await userService.getUsers();
 
       // Assert
-      expect(fetch).toHaveBeenCalledWith("http://localhost:8000/users");
+      expect(fetch).toHaveBeenCalledWith(`${API_URL}/users`);
       expect(result).toEqual(mockUsers);
     });
 
@@ -60,7 +62,7 @@ describe("API Integration Tests", () => {
       await expect(userService.getUsers()).rejects.toThrow(
         "Erreur lors de la récupération des utilisateurs"
       );
-      expect(fetch).toHaveBeenCalledWith("http://localhost:8000/users");
+      expect(fetch).toHaveBeenCalledWith(`${API_URL}/users`);
     });
 
     test("devrait gérer l'erreur 500 - Erreur serveur", async () => {
@@ -121,7 +123,7 @@ describe("API Integration Tests", () => {
       const result = await userService.createUser(validUserData);
 
       // Assert
-      expect(fetch).toHaveBeenCalledWith("http://localhost:8000/users", {
+      expect(fetch).toHaveBeenCalledWith(`${API_URL}/users`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -152,7 +154,7 @@ describe("API Integration Tests", () => {
       await expect(userService.createUser(invalidUserData)).rejects.toThrow(
         "Données invalides"
       );
-      expect(fetch).toHaveBeenCalledWith("http://localhost:8000/users", {
+      expect(fetch).toHaveBeenCalledWith(`${API_URL}/users`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

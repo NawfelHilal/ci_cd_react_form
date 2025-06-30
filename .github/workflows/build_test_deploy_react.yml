@@ -114,7 +114,6 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: react-form/build
-          if-no-files-found: error
 
   deploy:
     environment:
