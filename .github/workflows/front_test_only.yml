@@ -1,0 +1,40 @@
+name: Frontend Tests Only
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test_front:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20.x]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: react-form/package-lock.json
+      - name: Install dependencies
+        run: |
+          cd react-form
+          npm install
+          npm ci
+      - name: Build and test
+        run: |
+          cd react-form
+          npm run build
+          npm test -- --watchAll=false
+        env:
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          directory: react-form/coverage
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
