@@ -8,28 +8,25 @@ import {
 } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import App from "./App";
+import axios from "axios";
 
-// Mock fetch
-const mockFetch = jest.fn();
-global.fetch = mockFetch;
+// Mock axios
+jest.mock("axios");
+const mockedAxios = axios;
 
 // Augmenter le timeout global pour les tests
 jest.setTimeout(10000);
 
 describe("App Component", () => {
   beforeEach(() => {
-    mockFetch.mockClear();
     jest.clearAllMocks();
   });
 
   test("renders without crashing and displays user count", async () => {
-    // Mock fetch pour retourner des utilisateurs
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve([{}, {}, {}]),
-      })
-    );
+    // Mock axios pour retourner des utilisateurs
+    mockedAxios.get.mockResolvedValueOnce({
+      data: [{}, {}, {}],
+    });
 
     await act(async () => {
       render(<App />);
@@ -46,10 +43,8 @@ describe("App Component", () => {
   });
 
   test("handles fetch error gracefully", async () => {
-    // Mock fetch pour simuler une erreur
-    mockFetch.mockImplementationOnce(() =>
-      Promise.reject(new Error("API Error"))
-    );
+    // Mock axios pour simuler une erreur
+    mockedAxios.get.mockRejectedValueOnce(new Error("API Error"));
 
     await act(async () => {
       render(<App />);
@@ -66,12 +61,9 @@ describe("App Component", () => {
   });
 
   test("renders Form component", async () => {
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve([]),
-      })
-    );
+    mockedAxios.get.mockResolvedValueOnce({
+      data: [],
+    });
 
     await act(async () => {
       render(<App />);
@@ -86,16 +78,12 @@ describe("App Component", () => {
   });
 
   test("affiche la liste des utilisateurs avec leurs emails", async () => {
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve([
-            { firstName: "Jean", lastName: "Dupont", email: "jean@ex.com" },
-            { firstName: "Marie", lastName: "Curie", email: "marie@ex.com" },
-          ]),
-      })
-    );
+    mockedAxios.get.mockResolvedValueOnce({
+      data: [
+        { firstName: "Jean", lastName: "Dupont", email: "jean@ex.com" },
+        { firstName: "Marie", lastName: "Curie", email: "marie@ex.com" },
+      ],
+    });
 
     await act(async () => {
       render(<App />);
@@ -108,12 +96,9 @@ describe("App Component", () => {
   });
 
   test("affiche un message si aucun utilisateur n'est présent", async () => {
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve([]),
-      })
-    );
+    mockedAxios.get.mockResolvedValueOnce({
+      data: [],
+    });
 
     await act(async () => {
       render(<App />);
@@ -124,13 +109,14 @@ describe("App Component", () => {
     expect(listItems.length).toBe(0);
   });
 
-  test("gère le cas où fetch retourne ok: false", async () => {
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: false,
-        json: () => Promise.resolve([]),
-      })
-    );
+  test("gère le cas où axios retourne une erreur", async () => {
+    const error = {
+      response: {
+        status: 500,
+        data: { detail: "Server error" },
+      },
+    };
+    mockedAxios.get.mockRejectedValueOnce(error);
 
     await act(async () => {
       render(<App />);
@@ -142,23 +128,22 @@ describe("App Component", () => {
   });
 
   test("ajoute un utilisateur via le formulaire et met à jour la liste", async () => {
-    // 1er fetch : liste vide
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve([]),
-      })
-    );
-    // 2e fetch (après ajout) : liste avec un utilisateur
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve([
-            { firstName: "Nouveau", lastName: "User", email: "nouveau@ex.com" },
-          ]),
-      })
-    );
+    // 1er get : liste vide
+    mockedAxios.get.mockResolvedValueOnce({
+      data: [],
+    });
+    
+    // Mock pour la création d'utilisateur
+    mockedAxios.post.mockResolvedValueOnce({
+      data: { firstName: "Nouveau", lastName: "User", email: "nouveau@ex.com" },
+    });
+    
+    // 2e get (après ajout) : liste avec un utilisateur
+    mockedAxios.get.mockResolvedValueOnce({
+      data: [
+        { firstName: "Nouveau", lastName: "User", email: "nouveau@ex.com" },
+      ],
+    });
 
     await act(async () => {
       render(<App />);

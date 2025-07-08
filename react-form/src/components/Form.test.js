@@ -264,4 +264,395 @@ describe("Form coverage tests", () => {
     fillValidForm();
     expect(screen.getByRole("button", { name: /submit/i })).not.toBeDisabled();
   });
+
+  // Nouveaux tests pour améliorer la couverture
+  it("affiche l'erreur de validation pour le champ prénom", async () => {
+    render(<Form />);
+    fireEvent.change(screen.getByTestId("nom").querySelector("input"), {
+      target: { value: "Jean" },
+    });
+    fireEvent.change(screen.getByTestId("prenom").querySelector("input"), {
+      target: { value: "123" }, // Prénom invalide
+    });
+    fireEvent.change(screen.getByTestId("email").querySelector("input"), {
+      target: { value: "jean@ex.com" },
+    });
+    fireEvent.change(screen.getByTestId("dob").querySelector("input"), {
+      target: { value: "2000-01-01" },
+    });
+    fireEvent.change(screen.getByTestId("city").querySelector("input"), {
+      target: { value: "Paris" },
+    });
+    fireEvent.change(screen.getByTestId("postalCode").querySelector("input"), {
+      target: { value: "75000" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    expect(
+      screen.getByText("Le champ prenom ne doit contenir que des lettres et des accents.")
+    ).toBeInTheDocument();
+  });
+
+  it("affiche l'erreur de validation pour l'âge insuffisant", async () => {
+    render(<Form />);
+    fireEvent.change(screen.getByTestId("nom").querySelector("input"), {
+      target: { value: "Jean" },
+    });
+    fireEvent.change(screen.getByTestId("prenom").querySelector("input"), {
+      target: { value: "Dupont" },
+    });
+    fireEvent.change(screen.getByTestId("email").querySelector("input"), {
+      target: { value: "jean@ex.com" },
+    });
+    fireEvent.change(screen.getByTestId("dob").querySelector("input"), {
+      target: { value: "2010-01-01" }, // Trop jeune
+    });
+    fireEvent.change(screen.getByTestId("city").querySelector("input"), {
+      target: { value: "Paris" },
+    });
+    fireEvent.change(screen.getByTestId("postalCode").querySelector("input"), {
+      target: { value: "75000" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    expect(
+      screen.getByText("Vous devez avoir plus de 18 ans.")
+    ).toBeInTheDocument();
+  });
+
+  it("affiche l'erreur de validation pour la ville", async () => {
+    render(<Form />);
+    fireEvent.change(screen.getByTestId("nom").querySelector("input"), {
+      target: { value: "Jean" },
+    });
+    fireEvent.change(screen.getByTestId("prenom").querySelector("input"), {
+      target: { value: "Dupont" },
+    });
+    fireEvent.change(screen.getByTestId("email").querySelector("input"), {
+      target: { value: "jean@ex.com" },
+    });
+    fireEvent.change(screen.getByTestId("dob").querySelector("input"), {
+      target: { value: "2000-01-01" },
+    });
+    fireEvent.change(screen.getByTestId("city").querySelector("input"), {
+      target: { value: "Paris123" }, // Ville invalide
+    });
+    fireEvent.change(screen.getByTestId("postalCode").querySelector("input"), {
+      target: { value: "75000" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    expect(
+      screen.getByText("Le champ ville ne doit contenir que des lettres et des accents.")
+    ).toBeInTheDocument();
+  });
+
+  it("affiche l'erreur de validation pour le code postal", async () => {
+    render(<Form />);
+    fireEvent.change(screen.getByTestId("nom").querySelector("input"), {
+      target: { value: "Jean" },
+    });
+    fireEvent.change(screen.getByTestId("prenom").querySelector("input"), {
+      target: { value: "Dupont" },
+    });
+    fireEvent.change(screen.getByTestId("email").querySelector("input"), {
+      target: { value: "jean@ex.com" },
+    });
+    fireEvent.change(screen.getByTestId("dob").querySelector("input"), {
+      target: { value: "2000-01-01" },
+    });
+    fireEvent.change(screen.getByTestId("city").querySelector("input"), {
+      target: { value: "Paris" },
+    });
+    fireEvent.change(screen.getByTestId("postalCode").querySelector("input"), {
+      target: { value: "ABCDE" }, // Code postal invalide
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    expect(
+      screen.getByText("Le code postale doit être au format français.")
+    ).toBeInTheDocument();
+  });
+
+  it("supprime les erreurs de champ nom après correction", async () => {
+    render(<Form />);
+    
+    // Remplir avec des données partiellement invalides et soumettre
+    fireEvent.change(screen.getByTestId("nom").querySelector("input"), {
+      target: { value: "123" }, // Invalide
+    });
+    fillValidForm(); // Autres champs valides
+    fireEvent.change(screen.getByTestId("nom").querySelector("input"), {
+      target: { value: "123" }, // Garder invalide
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    
+    // Vérifier que l'erreur apparaît
+    expect(
+      screen.getByText("Le champ nom ne doit contenir que des lettres et des accents.")
+    ).toBeInTheDocument();
+    
+    // Corriger le champ nom
+    fireEvent.change(screen.getByTestId("nom").querySelector("input"), {
+      target: { value: "Jean" }, // Valide maintenant
+    });
+    
+    // L'erreur devrait disparaître
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Le champ nom ne doit contenir que des lettres et des accents.")
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("supprime les erreurs de champ prénom après correction", async () => {
+    render(<Form />);
+    
+    // Soumettre avec prénom invalide
+    fillValidForm();
+    fireEvent.change(screen.getByTestId("prenom").querySelector("input"), {
+      target: { value: "123" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    
+    expect(
+      screen.getByText("Le champ prenom ne doit contenir que des lettres et des accents.")
+    ).toBeInTheDocument();
+    
+    // Corriger le prénom
+    fireEvent.change(screen.getByTestId("prenom").querySelector("input"), {
+      target: { value: "Pierre" },
+    });
+    
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Le champ prenom ne doit contenir que des lettres et des accents.")
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("supprime les erreurs de champ email après correction", async () => {
+    render(<Form />);
+    
+    // Soumettre avec email invalide
+    fillValidForm();
+    fireEvent.change(screen.getByTestId("email").querySelector("input"), {
+      target: { value: "invalid" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    
+    expect(screen.getByText("Invalide champs email.")).toBeInTheDocument();
+    
+    // Corriger l'email
+    fireEvent.change(screen.getByTestId("email").querySelector("input"), {
+      target: { value: "valid@email.com" },
+    });
+    
+    await waitFor(() => {
+      expect(screen.queryByText("Invalide champs email.")).not.toBeInTheDocument();
+    });
+  });
+
+  it("supprime les erreurs de champ dob après correction", async () => {
+    render(<Form />);
+    
+    // Soumettre avec âge invalide
+    fillValidForm();
+    fireEvent.change(screen.getByTestId("dob").querySelector("input"), {
+      target: { value: "2010-01-01" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    
+    expect(screen.getByText("Vous devez avoir plus de 18 ans.")).toBeInTheDocument();
+    
+    // Corriger la date
+    fireEvent.change(screen.getByTestId("dob").querySelector("input"), {
+      target: { value: "1990-01-01" },
+    });
+    
+    await waitFor(() => {
+      expect(screen.queryByText("Vous devez avoir plus de 18 ans.")).not.toBeInTheDocument();
+    });
+  });
+
+  it("supprime les erreurs de champ city après correction", async () => {
+    render(<Form />);
+    
+    // Soumettre avec ville invalide
+    fillValidForm();
+    fireEvent.change(screen.getByTestId("city").querySelector("input"), {
+      target: { value: "Paris123" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    
+    expect(
+      screen.getByText("Le champ ville ne doit contenir que des lettres et des accents.")
+    ).toBeInTheDocument();
+    
+    // Corriger la ville
+    fireEvent.change(screen.getByTestId("city").querySelector("input"), {
+      target: { value: "Paris" },
+    });
+    
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Le champ ville ne doit contenir que des lettres et des accents.")
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("supprime les erreurs de champ postalCode après correction", async () => {
+    render(<Form />);
+    
+    // Soumettre avec code postal invalide
+    fillValidForm();
+    fireEvent.change(screen.getByTestId("postalCode").querySelector("input"), {
+      target: { value: "ABCDE" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    
+    expect(
+      screen.getByText("Le code postale doit être au format français.")
+    ).toBeInTheDocument();
+    
+    // Corriger le code postal
+    fireEvent.change(screen.getByTestId("postalCode").querySelector("input"), {
+      target: { value: "75001" },
+    });
+    
+    await waitFor(() => {
+      expect(
+        screen.queryByText("Le code postale doit être au format français.")
+      ).not.toBeInTheDocument();
+    });
+  });
+
+  it("ferme le Snackbar d'erreur", async () => {
+    const { userService } = require("../services/api");
+    userService.createUser.mockImplementationOnce(() =>
+      Promise.reject(new Error("Test error"))
+    );
+    
+    render(<Form />);
+    fillValidForm();
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    
+    // Attendre que l'erreur apparaisse
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+    });
+    
+    // Fermer le Snackbar
+    const closeButton = screen.getAllByRole("button").find(btn => 
+      btn.getAttribute("aria-label") === "Close"
+    );
+    if (closeButton) {
+      fireEvent.click(closeButton);
+    }
+    
+    await waitFor(() => {
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+  });
+
+  it("ferme le Snackbar de succès", async () => {
+    render(<Form />);
+    fillValidForm();
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    
+    // Attendre que le succès apparaisse
+    await waitFor(() => {
+      expect(screen.getByText("Enregistrement réussi")).toBeInTheDocument();
+    });
+    
+    // Fermer le Snackbar
+    const closeButton = screen.getAllByRole("button").find(btn => 
+      btn.getAttribute("aria-label") === "Close"
+    );
+    if (closeButton) {
+      fireEvent.click(closeButton);
+    }
+    
+    await waitFor(() => {
+      expect(screen.queryByText("Enregistrement réussi")).not.toBeInTheDocument();
+    });
+  });
+
+  it("gère une erreur API sans message spécifique", async () => {
+    const { userService } = require("../services/api");
+    userService.createUser.mockImplementationOnce(() =>
+      Promise.reject({}) // Erreur sans message
+    );
+    
+    render(<Form />);
+    fillValidForm();
+    fireEvent.click(screen.getByRole("button", { name: /submit/i }));
+    
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Erreur lors de l'enregistrement de l'utilisateur."
+      );
+    });
+  });
+
+  it("charge les données depuis localStorage au montage", () => {
+    const savedData = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "john@example.com",
+      dob: "1990-01-01",
+      city: "New York",
+      postalCode: "12345"
+    };
+    
+    localStorage.setItem("formData", JSON.stringify(savedData));
+    
+    render(<Form />);
+    
+    expect(screen.getByTestId("nom").querySelector("input")).toHaveValue("John");
+    expect(screen.getByTestId("prenom").querySelector("input")).toHaveValue("Doe");
+    expect(screen.getByTestId("email").querySelector("input")).toHaveValue("john@example.com");
+    expect(screen.getByTestId("dob").querySelector("input")).toHaveValue("1990-01-01");
+    expect(screen.getByTestId("city").querySelector("input")).toHaveValue("New York");
+    expect(screen.getByTestId("postalCode").querySelector("input")).toHaveValue("12345");
+  });
+
+  it("gère l'erreur de parsing localStorage", () => {
+    // Mock console.error pour éviter les logs d'erreur pendant le test
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+    
+    // Mettre des données invalides dans localStorage
+    localStorage.setItem("formData", "invalid json");
+    
+    render(<Form />);
+    
+    // Les champs devraient être vides
+    expect(screen.getByTestId("nom").querySelector("input")).toHaveValue("");
+    expect(screen.getByTestId("prenom").querySelector("input")).toHaveValue("");
+    
+    // Vérifier que l'erreur a été logguée
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Error loading form data:",
+      expect.any(Error)
+    );
+    
+    // Vérifier que localStorage a été nettoyé
+    expect(localStorage.getItem("formData")).toBeNull();
+    
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("gère les données localStorage nulles ou invalides", () => {
+    localStorage.setItem("formData", JSON.stringify(null));
+    
+    render(<Form />);
+    
+    // Les champs devraient être vides
+    expect(screen.getByTestId("nom").querySelector("input")).toHaveValue("");
+  });
+
+  it("gère les données localStorage non-objet", () => {
+    localStorage.setItem("formData", JSON.stringify("not an object"));
+    
+    render(<Form />);
+    
+    // Les champs devraient être vides
+    expect(screen.getByTestId("nom").querySelector("input")).toHaveValue("");
+  });
 });
