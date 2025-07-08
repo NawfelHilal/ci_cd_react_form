@@ -2,17 +2,18 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import Form from "./Form";
+import axios from "axios";
 
-// Mock fetch
-const mockFetch = jest.fn();
-global.fetch = mockFetch;
+// Mock axios
+jest.mock("axios");
+const mockedAxios = axios;
 
 // Augmenter le timeout pour les tests
 jest.setTimeout(10000);
 
 describe("Form DOM Interactions", () => {
   beforeEach(() => {
-    mockFetch.mockClear();
+    jest.clearAllMocks();
   });
 
   test("should show error messages in DOM when submitting invalid data", async () => {
@@ -102,12 +103,9 @@ describe("Form DOM Interactions", () => {
   });
 
   test("should show success message in DOM after valid submission", async () => {
-    mockFetch.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ message: "User created successfully" }),
-      })
-    );
+    mockedAxios.post.mockResolvedValueOnce({
+      data: { message: "User created successfully" },
+    });
 
     const user = userEvent.setup();
     render(<Form />);
@@ -137,13 +135,15 @@ describe("Form DOM Interactions", () => {
 
     // Vérifier que l'appel API a été fait
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith(
+      expect(mockedAxios.post).toHaveBeenCalledWith(
         expect.stringContaining("/users"),
         expect.objectContaining({
-          method: "POST",
-          headers: expect.objectContaining({
-            "Content-Type": "application/json",
-          }),
+          firstName: "Martin",
+          lastName: "Jean",
+          email: "test@test.com",
+          dob: "2000-01-01",
+          city: "Nice",
+          postalCode: "06200",
         })
       );
     });

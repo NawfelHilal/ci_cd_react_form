@@ -1,16 +1,15 @@
 import { userService } from "./api";
+import axios from "axios";
 
-// Mock fetch globalement
-global.fetch = jest.fn();
+// Mock axios
+jest.mock("axios");
+const mockedAxios = axios;
 
 describe("API Integration Tests", () => {
   const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
   beforeEach(() => {
-    // Reset all mocks before each test
     jest.clearAllMocks();
-    // Reset fetch mock
-    fetch.mockClear();
   });
 
   describe("getUsers - Récupération des utilisateurs", () => {
@@ -37,41 +36,44 @@ describe("API Integration Tests", () => {
         },
       ];
 
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockUsers,
+      mockedAxios.get.mockResolvedValueOnce({
+        data: mockUsers,
       });
 
       // Act
       const result = await userService.getUsers();
 
       // Assert
-      expect(fetch).toHaveBeenCalledWith(`${API_URL}/users`);
+      expect(mockedAxios.get).toHaveBeenCalledWith(`${API_URL}/users`);
       expect(result).toEqual(mockUsers);
     });
 
     test("devrait gérer l'erreur 404 - Aucun utilisateur trouvé", async () => {
       // Arrange
-      fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 404,
-        json: async () => ({ detail: "Aucun utilisateur trouvé" }),
-      });
+      const error = {
+        response: {
+          status: 404,
+          data: { detail: "Aucun utilisateur trouvé" },
+        },
+      };
+      mockedAxios.get.mockRejectedValueOnce(error);
 
       // Act & Assert
       await expect(userService.getUsers()).rejects.toThrow(
         "Erreur lors de la récupération des utilisateurs"
       );
-      expect(fetch).toHaveBeenCalledWith(`${API_URL}/users`);
+      expect(mockedAxios.get).toHaveBeenCalledWith(`${API_URL}/users`);
     });
 
     test("devrait gérer l'erreur 500 - Erreur serveur", async () => {
       // Arrange
-      fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        json: async () => ({ detail: "Erreur interne du serveur" }),
-      });
+      const error = {
+        response: {
+          status: 500,
+          data: { detail: "Erreur interne du serveur" },
+        },
+      };
+      mockedAxios.get.mockRejectedValueOnce(error);
 
       // Act & Assert
       await expect(userService.getUsers()).rejects.toThrow(
@@ -81,7 +83,8 @@ describe("API Integration Tests", () => {
 
     test("devrait gérer l'erreur de réseau", async () => {
       // Arrange
-      fetch.mockRejectedValueOnce(new Error("Network Error"));
+      const error = new Error("Network Error");
+      mockedAxios.get.mockRejectedValueOnce(error);
 
       // Act & Assert
       await expect(userService.getUsers()).rejects.toThrow("Network Error");
@@ -89,7 +92,8 @@ describe("API Integration Tests", () => {
 
     test("devrait gérer l'erreur inattendue", async () => {
       // Arrange
-      fetch.mockRejectedValueOnce(new Error("Erreur inattendue"));
+      const error = new Error("Erreur inattendue");
+      mockedAxios.get.mockRejectedValueOnce(error);
 
       // Act & Assert
       await expect(userService.getUsers()).rejects.toThrow("Erreur inattendue");
@@ -113,23 +117,15 @@ describe("API Integration Tests", () => {
         ...validUserData,
       };
 
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        status: 201,
-        json: async () => createdUser,
+      mockedAxios.post.mockResolvedValueOnce({
+        data: createdUser,
       });
 
       // Act
       const result = await userService.createUser(validUserData);
 
       // Assert
-      expect(fetch).toHaveBeenCalledWith(`${API_URL}/users`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(validUserData),
-      });
+      expect(mockedAxios.post).toHaveBeenCalledWith(`${API_URL}/users`, validUserData);
       expect(result).toEqual(createdUser);
     });
 
@@ -144,34 +140,30 @@ describe("API Integration Tests", () => {
         postalCode: "75001",
       };
 
-      fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 400,
-        json: async () => ({ detail: "Données invalides" }),
-      });
+      const error = {
+        response: {
+          status: 400,
+          data: { detail: "Données invalides" },
+        },
+      };
+      mockedAxios.post.mockRejectedValueOnce(error);
 
       // Act & Assert
       await expect(userService.createUser(invalidUserData)).rejects.toThrow(
         "Données invalides"
       );
-      expect(fetch).toHaveBeenCalledWith(`${API_URL}/users`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(invalidUserData),
-      });
+      expect(mockedAxios.post).toHaveBeenCalledWith(`${API_URL}/users`, invalidUserData);
     });
 
     test("devrait gérer l'erreur 409 - Email déjà existant", async () => {
       // Arrange
-      fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 409,
-        json: async () => ({
-          detail: "Un utilisateur avec cet email existe déjà",
-        }),
-      });
+      const error = {
+        response: {
+          status: 409,
+          data: { detail: "Un utilisateur avec cet email existe déjà" },
+        },
+      };
+      mockedAxios.post.mockRejectedValueOnce(error);
 
       // Act & Assert
       await expect(userService.createUser(validUserData)).rejects.toThrow(
@@ -181,11 +173,13 @@ describe("API Integration Tests", () => {
 
     test("devrait gérer l'erreur 422 - Validation échouée", async () => {
       // Arrange
-      fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 422,
-        json: async () => ({ detail: "Erreur de validation des données" }),
-      });
+      const error = {
+        response: {
+          status: 422,
+          data: { detail: "Erreur de validation des données" },
+        },
+      };
+      mockedAxios.post.mockRejectedValueOnce(error);
 
       // Act & Assert
       await expect(userService.createUser(validUserData)).rejects.toThrow(
@@ -195,7 +189,8 @@ describe("API Integration Tests", () => {
 
     test("devrait gérer l'erreur de réseau lors de la création", async () => {
       // Arrange
-      fetch.mockRejectedValueOnce(new Error("Network Error"));
+      const error = new Error("Network Error");
+      mockedAxios.post.mockRejectedValueOnce(error);
 
       // Act & Assert
       await expect(userService.createUser(validUserData)).rejects.toThrow(
@@ -205,7 +200,8 @@ describe("API Integration Tests", () => {
 
     test("devrait gérer l'erreur de timeout", async () => {
       // Arrange
-      fetch.mockRejectedValueOnce(new Error("timeout of 10000ms exceeded"));
+      const error = new Error("timeout of 10000ms exceeded");
+      mockedAxios.post.mockRejectedValueOnce(error);
 
       // Act & Assert
       await expect(userService.createUser(validUserData)).rejects.toThrow(
@@ -229,16 +225,13 @@ describe("API Integration Tests", () => {
       const createdUser = { id: 3, ...userData };
 
       // Mock création
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        status: 201,
-        json: async () => createdUser,
+      mockedAxios.post.mockResolvedValueOnce({
+        data: createdUser,
       });
 
       // Mock récupération
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [createdUser],
+      mockedAxios.get.mockResolvedValueOnce({
+        data: [createdUser],
       });
 
       // Act
@@ -248,7 +241,8 @@ describe("API Integration Tests", () => {
       // Assert
       expect(created).toEqual(createdUser);
       expect(users).toContainEqual(createdUser);
-      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(mockedAxios.post).toHaveBeenCalledTimes(1);
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
     });
 
     test("devrait gérer les erreurs en cascade", async () => {
@@ -263,18 +257,22 @@ describe("API Integration Tests", () => {
       };
 
       // Mock erreur de création
-      fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 409,
-        json: async () => ({ detail: "Email déjà utilisé" }),
-      });
+      const createError = {
+        response: {
+          status: 409,
+          data: { detail: "Email déjà utilisé" },
+        },
+      };
+      mockedAxios.post.mockRejectedValueOnce(createError);
 
       // Mock récupération qui échoue aussi
-      fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        json: async () => ({ detail: "Erreur serveur" }),
-      });
+      const getError = {
+        response: {
+          status: 500,
+          data: { detail: "Erreur serveur" },
+        },
+      };
+      mockedAxios.get.mockRejectedValueOnce(getError);
 
       // Act & Assert
       await expect(userService.createUser(userData)).rejects.toThrow(
@@ -300,24 +298,27 @@ describe("API Integration Tests", () => {
           firstName: "John",
           lastName: "",
           email: "john@example.com",
-          dob: "2010-01-01", // Trop jeune
+          dob: "2010-01-01",
           city: "Paris",
           postalCode: "75001",
         },
       ];
 
       // Mock erreurs de validation
-      fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 422,
-        json: async () => ({ detail: "Prénom requis et email invalide" }),
-      });
-
-      fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 422,
-        json: async () => ({ detail: "Nom requis et âge insuffisant" }),
-      });
+      const error1 = {
+        response: {
+          status: 422,
+          data: { detail: "Prénom requis et email invalide" },
+        },
+      };
+      const error2 = {
+        response: {
+          status: 422,
+          data: { detail: "Nom requis et âge insuffisant" },
+        },
+      };
+      mockedAxios.post.mockRejectedValueOnce(error1);
+      mockedAxios.post.mockRejectedValueOnce(error2);
 
       // Act & Assert
       await expect(userService.createUser(invalidUsers[0])).rejects.toThrow(
@@ -332,9 +333,8 @@ describe("API Integration Tests", () => {
   describe("Gestion des cas limites", () => {
     test("devrait gérer une liste vide d'utilisateurs", async () => {
       // Arrange
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => [],
+      mockedAxios.get.mockResolvedValueOnce({
+        data: [],
       });
 
       // Act
@@ -358,10 +358,8 @@ describe("API Integration Tests", () => {
 
       const createdUser = { id: 4, ...userWithSpecialChars };
 
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        status: 201,
-        json: async () => createdUser,
+      mockedAxios.post.mockResolvedValueOnce({
+        data: createdUser,
       });
 
       // Act
@@ -387,10 +385,8 @@ describe("API Integration Tests", () => {
 
       const createdUser = { id: 5, ...longUserData };
 
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        status: 201,
-        json: async () => createdUser,
+      mockedAxios.post.mockResolvedValueOnce({
+        data: createdUser,
       });
 
       // Act
@@ -406,12 +402,8 @@ describe("API Integration Tests", () => {
   describe("Gestion des erreurs de parsing JSON", () => {
     test("devrait gérer l'erreur de parsing JSON invalide", async () => {
       // Arrange
-      fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => {
-          throw new Error("Unexpected token < in JSON at position 0");
-        },
-      });
+      const error = new Error("Unexpected token < in JSON at position 0");
+      mockedAxios.get.mockRejectedValueOnce(error);
 
       // Act & Assert
       await expect(userService.getUsers()).rejects.toThrow(
@@ -430,13 +422,8 @@ describe("API Integration Tests", () => {
         postalCode: "75001",
       };
 
-      fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 400,
-        json: async () => {
-          throw new Error("Invalid JSON response");
-        },
-      });
+      const error = new Error("Invalid JSON response");
+      mockedAxios.post.mockRejectedValueOnce(error);
 
       // Act & Assert
       await expect(userService.createUser(userData)).rejects.toThrow(

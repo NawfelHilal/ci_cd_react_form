@@ -1,12 +1,12 @@
 import { userService } from "./api";
+import axios from "axios";
 
-// Mock fetch
-const mockFetch = jest.fn();
-global.fetch = mockFetch;
+// Mock axios
+jest.mock("axios");
+const mockedAxios = axios;
 
 describe("API Service Tests", () => {
   beforeEach(() => {
-    mockFetch.mockClear();
     jest.clearAllMocks();
   });
 
@@ -17,33 +17,32 @@ describe("API Service Tests", () => {
         { id: 2, firstName: "Jane", lastName: "Smith" },
       ];
 
-      mockFetch.mockImplementationOnce(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockUsers),
-        })
-      );
+      mockedAxios.get.mockResolvedValueOnce({
+        data: mockUsers,
+      });
 
       const result = await userService.getUsers();
       expect(result).toEqual(mockUsers);
-      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining("/users"));
+      expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringContaining("/users"));
     });
 
     test("handles API error when fetching users", async () => {
       const error = new Error("Network error");
-      mockFetch.mockImplementationOnce(() => Promise.reject(error));
+      mockedAxios.get.mockRejectedValueOnce(error);
 
       await expect(userService.getUsers()).rejects.toThrow("Network error");
-      expect(mockFetch).toHaveBeenCalledWith(expect.stringContaining("/users"));
+      expect(mockedAxios.get).toHaveBeenCalledWith(expect.stringContaining("/users"));
     });
 
-    test("throws if response.ok is false", async () => {
-      mockFetch.mockImplementationOnce(() =>
-        Promise.resolve({
-          ok: false,
-          json: () => Promise.resolve({}),
-        })
-      );
+    test("throws if response has error status", async () => {
+      const error = {
+        response: {
+          status: 500,
+          data: { detail: "Server error" },
+        },
+      };
+      mockedAxios.get.mockRejectedValueOnce(error);
+
       await expect(userService.getUsers()).rejects.toThrow(
         "Erreur lors de la récupération des utilisateurs"
       );
@@ -66,73 +65,63 @@ describe("API Service Tests", () => {
         user: mockUserData,
       };
 
-      mockFetch.mockImplementationOnce(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve(mockResponse),
-        })
-      );
+      mockedAxios.post.mockResolvedValueOnce({
+        data: mockResponse,
+      });
 
       const result = await userService.createUser(mockUserData);
       expect(result).toEqual(mockResponse);
-      expect(mockFetch).toHaveBeenCalledWith(
+      expect(mockedAxios.post).toHaveBeenCalledWith(
         expect.stringContaining("/users"),
-        expect.objectContaining({
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(mockUserData),
-        })
+        mockUserData
       );
     });
 
     test("handles API error when creating user", async () => {
       const error = new Error("Network error");
-      mockFetch.mockImplementationOnce(() => Promise.reject(error));
+      mockedAxios.post.mockRejectedValueOnce(error);
 
       await expect(userService.createUser(mockUserData)).rejects.toThrow(
         "Network error"
       );
-      expect(mockFetch).toHaveBeenCalledWith(
+      expect(mockedAxios.post).toHaveBeenCalledWith(
         expect.stringContaining("/users"),
-        expect.objectContaining({
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(mockUserData),
-        })
+        mockUserData
       );
     });
 
     test("handles malformed response data", async () => {
-      mockFetch.mockImplementationOnce(() =>
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ invalid: "data" }),
-        })
-      );
+      mockedAxios.post.mockResolvedValueOnce({
+        data: { invalid: "data" },
+      });
 
       const result = await userService.createUser(mockUserData);
       expect(result).toEqual({ invalid: "data" });
     });
 
-    test("throws if response.ok is false and data.detail is present", async () => {
-      mockFetch.mockImplementationOnce(() =>
-        Promise.resolve({
-          ok: false,
-          json: () => Promise.resolve({ detail: "Erreur API" }),
-        })
-      );
+    test("throws if response has error status and data.detail is present", async () => {
+      const error = {
+        response: {
+          status: 400,
+          data: { detail: "Erreur API" },
+        },
+      };
+      mockedAxios.post.mockRejectedValueOnce(error);
+
       await expect(userService.createUser(mockUserData)).rejects.toThrow(
         "Erreur API"
       );
     });
 
-    test("throws if response.ok is false and data.detail is missing", async () => {
-      mockFetch.mockImplementationOnce(() =>
-        Promise.resolve({
-          ok: false,
-          json: () => Promise.resolve({}),
-        })
-      );
+    test("throws if response has error status and data.detail is missing", async () => {
+      const error = {
+        response: {
+          status: 400,
+          data: {},
+        },
+      };
+      mockedAxios.post.mockRejectedValueOnce(error);
+
       await expect(userService.createUser(mockUserData)).rejects.toThrow(
         "Erreur lors de la création de l'utilisateur"
       );
